@@ -902,6 +902,7 @@ public class GraphSample
         int xx = int.Parse(lineCountStr[1]); //열
 
         int[,] graph = new int[yy, xx];
+        int[,] visited = new int[yy, xx];
         for (int y = 0; y < yy; y++)
         {
             string yyStr = Console.ReadLine();
@@ -911,6 +912,19 @@ public class GraphSample
                 graph[y, x] = num;
             }
         }
+        BreakWallBfs(graph, visited);
+    }
+
+    static void BreakWallBfs(int[,] _graph, int[,] _visited)
+    {
+        //벽을 뿌수고 가는 경우만 추가하면될듯
+        Queue<(int,int)> path = new();
+        path.Enqueue((1, 1));
+        while (path.Count()>0)
+        {
+            (int, int) node = path.Dequeue();
+        }
+
     }
   
 }
