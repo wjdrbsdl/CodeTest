@@ -216,7 +216,62 @@ public class GraphSample
         return neighbors;
     }
 
+    #region 컴퓨터 바이러스
+    static void ComputerVirus()
+    {
+        //이게 왜 그래프 순회 문제일까. 
+        // 1번 컴퓨터로 부터 연결되어 있는 모든 컴퓨터의 수를 구해야한다. 
+        // 이건? 그래프라는 자료구조를 가지고, 1번 정점을 기준으로 순회해야 알 수 있는것이다?
+
+        int computerCount = int.Parse(Console.ReadLine());
+        int networkCount = int.Parse(Console.ReadLine());
+
+        List<int>[] networkGraph = new List<int>[101];
+        bool[] isVisit = new bool[101];
+        for (int i = 1; i <= 100; i++)
+        {
+            networkGraph[i] = new List<int>();
+        }
+
+        //연결선 만들기
+        for (int i = 0; i < networkCount; i++)
+        {
+            string[] lineStr = Console.ReadLine().Split();
+            int from = int.Parse(lineStr[0]);
+            int to = int.Parse(lineStr[1]);
+
+            networkGraph[from].Add(to);
+            networkGraph[to].Add(from);
+        }
+
+        int visitCount = DoDfs(networkGraph, 1, isVisit);
+        Console.WriteLine(visitCount);
+    }
+
+    static int DoDfs(List<int>[] _graph, int _number, bool[] _isVisit)
+    {
+        //_number에서 방문가능한 노드 찾기
+
+        _isVisit[_number] = true;
+        int visitCount = 1;
+        List<int> nextNumList = _graph[_number];
+        for (int i = 0; i < nextNumList.Count; i++)
+        {
+            int nextNum = nextNumList[i];
+            if (_isVisit[nextNum] == false)
+            {
+
+                visitCount += DoDfs(_graph, nextNum, _isVisit);
+            }
+
+        }
+        return visitCount;
+    }
+    #endregion
+
     #region 단지구역2667
+    
+
     class StringNode
     {
         public int total = 0;
@@ -432,7 +487,6 @@ public class GraphSample
 
             FindNode doubleNode = new FindNode(find);
             doubleNode.DoubleMove(); //2배이동한거
-
             FindNode leftNode = new FindNode(find);
             leftNode.Left();  //왼쪽 이동
             FindNode rightNode = new FindNode(find);
@@ -889,44 +943,286 @@ public class GraphSample
     }
     #endregion
 
-    static void Main()
+    #region 괄호 세기
+    static void Parenthesis()
     {
-        BreakWall();
+        int commandCount = int.Parse(Console.ReadLine());
+
+        for (int i = 0; i < commandCount; i++)
+        {
+            Stack<char> parenthStack = new();
+            string command = Console.ReadLine();
+            bool isGood = true;
+            for (int strIdx = 0; strIdx < command.Length; strIdx++)
+            {
+                if (command[strIdx] == '(')
+                {
+                    parenthStack.Push(command[strIdx]);
+                }
+                else if (command[strIdx] == ')')
+                {
+                    if (parenthStack.TryPop(out char parenChar))
+                    {
+                        if (parenChar != '(')
+                        {
+                            isGood = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        isGood = false;
+                        break;
+                    }
+                }
+            }
+            if (isGood == false || parenthStack.Count != 0)
+            {
+                //짝꿍다 안되었으면 실패
+                Console.WriteLine("NO");
+            }
+            else
+            {
+                Console.WriteLine("YES"); //아니면 성공
+            }
+
+        }
+
+    }
+    #endregion
+
+    #region 숨바꼭질풀이
+    static void HideResolve()
+    {
+        int[] hideGraph = new int[100001]; //수직선의 좌표가 정점
+
+        string[] inputs = Console.ReadLine().Split();
+
+        int bro = int.Parse(inputs[0]);
+        int youngPos = int.Parse(inputs[1]);
+
+        // 그래프 순회를 위해선 먼저 탐색할 집합이 필요
+        // 그래프, 기록지
+        bool[] isVisited = new bool[100_001];
+        int[] visitTime = new int[100_001]; //얼마만에 갔는가
+        //2. 방문 기록할 컨테이너 선택 - 너비탐색을 위해 Queue 사용
+        Queue<int> searchRoot = new();
+        searchRoot.Enqueue(bro); //형 위치 시작
+        visitTime[bro] = 0;
+
+        int sec = 0;
+        while (searchRoot.Count > 0) //탐색할 위치 있는 동안 반복
+        {
+            int lineCount = searchRoot.Count();
+            bool isFound = false;
+
+            for (int lineIndex = 0; lineIndex < lineCount; ++lineIndex)
+            {
+                int curBroPos = searchRoot.Dequeue();
+
+                if (curBroPos == youngPos)
+                {
+                    //동생 잡았다.
+                    isFound = true;
+                    break;//탐색종료
+                }
+
+                //방문했다면
+                isVisited[curBroPos] = true; //현재 위치 방문했다고 콕
+
+                //아니라면 탐색 진행
+                int[] direct = { -1, 1, curBroPos };
+                for (int i = 0; i < 3; i++)
+                {
+                    int nextPos = curBroPos + direct[i];
+                    //다음 가려는 위치가 유효한가
+                    if (nextPos < 0 || 100_000 < nextPos)
+                    {
+                        continue; //벗어나면 넘김
+                    }
+                    if (isVisited[nextPos] == true)
+                    {
+                        //방문한곳이면
+                        continue;
+                    }
+                    searchRoot.Enqueue(nextPos);
+                    visitTime[nextPos] = visitTime[curBroPos] + 1;
+                }
+            }
+
+            if (isFound == true)
+            {
+                break;
+            }
+            sec++;
+        }
+
+        Console.WriteLine(visitTime[youngPos]);
+    }
+    #endregion
+
+    #region 아파트단지 풀이
+    static void MakeApart()
+    {
+        string[] map = new string[25];
+        int lineCount = int.Parse(Console.ReadLine());
+        for (int i = 0; i < lineCount; i++)
+        {
+            map[i] = Console.ReadLine();
+        }
+
+        bool[,] isVisit = new bool[25, 25];
+        List<int> townScaleList = new();
+        for (int r = 0; r < lineCount; r++)
+        {
+            for (int c = 0; c < lineCount; c++)
+            {
+                if (map[r][c] == '1' && isVisit[r, c] == false)
+                {
+                    townScaleList.Add(MakeTown(map, isVisit, r, c, lineCount));
+                }
+
+            }
+        }
+        townScaleList.Sort((a, b) => a.CompareTo(b));
+
+        Console.WriteLine(5);
     }
 
+    static int MakeTown(string[] _townGraph, bool[,] _isVisited, int _r, int _c, int _length)
+    {
+        //유효범위 먼저 체크 - 그래야 뒤에서 인덱스 오류가 안남
+        if (_r < 0 || _length <= _r || _c < 0 || _length <= _c)
+        {
+            //유효 범위 밖이면 리턴
+            return 0;
+        }
+
+        if (_townGraph[_r][_c] != '1')
+        {
+            //방문한곳이 집이 아니면 리턴
+            return 0;
+        }
+        if (_isVisited[_r, _c] == true)
+        {
+            //방문했던 곳이면 리턴
+            return 0;
+        }
+
+
+
+        _isVisited[_r, _c] = true;
+
+        //그게아니라면 상하좌우 탐색추가
+        int[] dr = { -1, 1, 0, 0 };
+        int[] dc = { 0, 0, -1, 1 };
+        int visit = 1;
+        for (int i = 0; i < 4; i++)
+        {
+            int nr = _r + dr[i];
+            int nc = _c + dc[i];
+
+            visit += MakeTown(_townGraph, _isVisited, nr, nc, _length);
+        }
+        return visit;
+    }
+    #endregion
+   
+
+    #region 벽부수기
     static void BreakWall()
     {
         string[] lineCountStr = Console.ReadLine().Split();
 
-        int yy = int.Parse(lineCountStr[0]); //행
-        int xx = int.Parse(lineCountStr[1]); //열
+        int rr = int.Parse(lineCountStr[0]); //행
+        int cc = int.Parse(lineCountStr[1]); //열
 
-        int[,] graph = new int[yy, xx];
-        int[,] visited = new int[yy, xx];
-        for (int y = 0; y < yy; y++)
+        int[,] graph = new int[rr, cc];
+        int[, ,] visited = new int[rr, cc, 2]; ///3번째값이 0 이냐 1이냐에 따라 0이면 안부쉇던것
+        for (int r = 0; r < rr; r++)
         {
             string yyStr = Console.ReadLine();
-            for (int x = 0; x < xx; x++)
+            for (int c = 0; c < cc; c++)
             {
-                int num = (yyStr[x] - 48);
-                graph[y, x] = num;
+                int num = (yyStr[c] - 48);
+                graph[r, c] = num;
             }
         }
-        BreakWallBfs(graph, visited);
+        BreakWallBfs(graph, visited, rr, cc);
     }
 
-    static void BreakWallBfs(int[,] _graph, int[,] _visited)
+    static void BreakWallBfs(int[,] _graph, int[, ,] _visited, int _rLength, int _cLength)
     {
         //벽을 뿌수고 가는 경우만 추가하면될듯
-        Queue<(int,int)> path = new();
-        path.Enqueue((1, 1));
-        while (path.Count()>0)
+        Queue<(int, int, int)> path = new();
+        path.Enqueue((0, 0, 0)); //시작 부분 0,0, 안부순 0 
+        _visited[0, 0, 0] = 1;
+        while (path.Count() > 0)
         {
-            (int, int) node = path.Dequeue();
+            (int, int, int) node = path.Dequeue();
+
+            //4방으로 돌기 시작하고, 돌기 가능한것만 큐에 넣을 것 
+            int currr = node.Item1;
+            int curcc = node.Item2;
+            int isBroke = node.Item3; // 1이면 부순것
+            int[] drr = { -1, 1, 0, 0 };
+            int[] dcc = { 0, 0, -1, 1 };
+            //이동 방향에 벽이 있으면 1번은 부술 수 있다. 
+            //어떠한 이 행동을 1번만 할 수 있다.
+            //쉽게 보면 모든 벽을 하나씩 0으로 만든다음 최소 거리 하면되는데
+            //벽 부수면서 간 경로와
+            //부수지 않고 간 경로를 별개로 기록한다
+            //그래서 이동값 기록에 그 별개를 넣는다.
+            for (int i = 0; i < 4; i++)
+            {
+                int nrr = currr + drr[i];
+                int ncc = curcc + dcc[i];
+
+                if ((0 <= nrr && nrr < _rLength && 0 <= ncc && ncc < _cLength) == false)
+                {
+                    //유효범위 밖이면 넘기고
+                    continue;
+                }
+                if (_graph[nrr, ncc] != 1 && _visited[nrr, ncc, isBroke] == 0)
+                {
+                    //벽이 아니면서, 부쉈던, 안부쉇던 그 타입으로 간적이 없으면
+                    _visited[nrr, ncc, isBroke] = _visited[currr, curcc, isBroke] + 1; //스텝 카운트 올리고
+                    path.Enqueue((nrr, ncc, isBroke)); //벽 상태까지 전달하고
+                    continue;
+                }
+                if (_graph[nrr, ncc] == 1 && isBroke == 0 && _visited[nrr, ncc, 1] == 0)
+                {
+                    //만약 벽인데, 부순적이 없고, 부순 경로에서 거길 간적이 없으면 최초 부수기 
+                    _visited[nrr, ncc, 1] = _visited[currr, curcc, 0] + 1; //스텝 카운트 올리고
+                    path.Enqueue((nrr, ncc, 1)); //벽 부순걸로 진행하고 
+                    continue;
+                }
+            }
         }
 
+        int answer = _visited[_rLength - 1, _cLength - 1, 0]; //안부순 버전 길이
+        int brokenAnswer = _visited[_rLength - 1, _cLength - 1, 1]; //부순 버전 길이
+        int final = int.MaxValue;
+        if(answer != 0)
+        {
+            final = answer;
+        }
+        if(brokenAnswer != 0)
+        {
+            final = Math.Min(brokenAnswer, final);
+        }
+        if(final == int.MaxValue)
+        {
+            final = -1;
+        }
+        Console.WriteLine(final);
     }
-  
+    #endregion
+
+    static void FF()
+    {
+
+    }
 }
 
 #region 덱
