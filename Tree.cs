@@ -240,7 +240,7 @@ public class Tree
             distanceRecord[i] = INF;
         }
         distanceRecord[start] = 0;
-        int[] path  = new int[graph.Length];
+        int[] path = new int[graph.Length];
         for (int i = 0; i < path.Length; i++)
         {
             path[i] = NoWay;
@@ -274,7 +274,7 @@ public class Tree
         Stack<int> pathStack = new();
         int cur = goal;
         pathStack.Push(goal);
-        while(cur != start)
+        while (cur != start)
         {
             int pre = path[cur];
             pathStack.Push(pre);
@@ -292,7 +292,6 @@ public class Tree
 
     #endregion
 
- 
     #region A*
     const int MAX_Y = 10;
     const int MAX_X = 10;
@@ -355,7 +354,7 @@ public class Tree
     static int GetHeuristic(int _x1, int _y1, int _x2, int _y2)
     {
         //맨해튼 방식
-       return Math.Abs(_x1 - _x2) + Math.Abs(_y2 - _y1);
+        return Math.Abs(_x1 - _x2) + Math.Abs(_y2 - _y1);
     }
 
     static void SetPath()
@@ -407,7 +406,7 @@ public class Tree
                 if (nextNode.F > f)
                 {
                     nextNode.F = f;
-                    if(nextNode.X == endX && nextNode.Y == endY)
+                    if (nextNode.X == endX && nextNode.Y == endY)
                     {
 
                     }
@@ -419,46 +418,457 @@ public class Tree
 
         Stack<AstarNode> pathStack = new();
         AstarNode curNode = pathMap[endY, endX];
-        while(curNode.X != startX && curNode.Y != startY)
+        while (curNode.X != startX && curNode.Y != startY)
         {
             AstarNode pre = curNode.Path;
-            Console.WriteLine(pre.X +" "+pre.Y);
+            Console.WriteLine(pre.X + " " + pre.Y);
             curNode = pre;
         }
     }
 
     #endregion
 
-    static void Main()
+    #region 최단경로1753
+    static void FindFastPath()
     {
-        ConstructMap();
-        AStar();
-        SetPath();
+        string[] veInfo = Console.ReadLine().Split();
+        int vCount = int.Parse(veInfo[0]);
+        int eCount = int.Parse(veInfo[1]);
+        int startV = int.Parse(Console.ReadLine());
+
+        //그래프 그리기
+        Dictionary<int, int>[] graph = new Dictionary<int, int>[vCount + 1];
+        for (int i = 0; i < eCount; i++)
+        {
+            string[] eInfo = Console.ReadLine().Split();
+            int start = int.Parse(eInfo[0]);
+            int end = int.Parse(eInfo[1]);
+            int weight = int.Parse(eInfo[2]);
+            InsertWeight(start, end, weight, graph);
+        }
+
+        DiSearch(startV, vCount, graph);
     }
 
-    #region 전위입력후위출력
-    static void FirstSearch()
+    static void InsertWeight(int _startV, int _endV, int _weight, Dictionary<int, int>[] _graph)
     {
-        int[,] binaryTree = new int[100001, 3];
-        int parent = int.Parse(Console.ReadLine());
-        while (true)
+        Dictionary<int, int> startDic = _graph[_startV];
+        if (startDic == null)
         {
-            string command = Console.ReadLine();
-            if (command == null)
+            startDic = new();
+            _graph[_startV] = startDic;
+        }
+        if (startDic.ContainsKey(_endV))
+        {
+            startDic[_endV] = Math.Min(startDic[_endV], _weight);
+        }
+        else
+        {
+            startDic.Add(_endV, _weight);
+        }
+
+        Dictionary<int, int> endDic = _graph[_endV];
+        if (endDic == null)
+        {
+            endDic = new();
+            _graph[_endV] = endDic;
+        }
+        if (startDic.ContainsKey(_startV))
+        {
+            startDic[_startV] = Math.Min(startDic[_startV], _weight);
+        }
+        else
+        {
+            startDic.Add(_startV, _weight);
+        }
+    }
+
+    static void DiSearch(int _start, int _vCount, Dictionary<int, int>[] _graph)
+    {
+        int[] distance = new int[_vCount + 1];
+        for (int i = 0; i < distance.Length; i++)
+        {
+            distance[i] = int.MaxValue; //최대거리로 초기화하고
+        }
+        distance[_start] = 0; //시작은 0으로하고
+
+        PriorityQueue<int, int> que = new();
+        que.Enqueue(_start, 0); //시작정점과 여기까지의 거리 0을 넣고
+
+        while (que.Count > 0)
+        {
+            int currentV = que.Dequeue(); //거리가 제일 짧은 녀석을 뽑고
+            Dictionary<int, int> currentPath = _graph[currentV];
+            foreach (KeyValuePair<int, int> item in currentPath)
             {
+                int nextV = item.Key; //갈 수 있는 정점
+                int weight = item.Value; //그 정점까지의 가중치
+
+                int newWeight = distance[currentV] + weight; //현재위치까지 왔던 값에 가중치를 더함
+
+                if (newWeight < distance[nextV])
+                {
+                    //새로 갱신된 경로가 기존 경로보다 짧으면
+                    distance[nextV] = newWeight; //거기까지 가는 경로 길이를 수정하고
+                    que.Enqueue(nextV, newWeight); //nextV 까지 가는 거리로 추가 
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < distance.Length; i++)
+        {
+            int value = distance[i];
+            if (value == int.MaxValue)
+            {
+                sb.AppendLine("INF");
+            }
+            else
+            {
+                sb.AppendLine(value.ToString());
+            }
+        }
+        Console.WriteLine(sb);
+    }
+    #endregion
+
+    #region 최단경로1504
+    static void SpecialRoute()
+    {
+        string[] veInfo = Console.ReadLine().Split();
+        int vCount = int.Parse(veInfo[0]);
+        int eCount = int.Parse(veInfo[1]);
+
+        //그래프 그리기
+        Dictionary<int, int>[] graph = new Dictionary<int, int>[vCount + 1];
+        for (int i = 0; i < eCount; i++)
+        {
+            string[] eInfo = Console.ReadLine().Split();
+            int start = int.Parse(eInfo[0]);
+            int end = int.Parse(eInfo[1]);
+            int weight = int.Parse(eInfo[2]);
+            SInsertWeight(start, end, weight, graph);
+        }
+
+        string[] specialInfo = Console.ReadLine().Split();
+        int routeA = int.Parse(specialInfo[0]);
+        int routeB = int.Parse(specialInfo[1]);
+
+        int a1 = SDiSearch(1, vCount, graph, routeA);
+        int a2 = SDiSearch(routeA, vCount, graph, routeB);
+        int a3 = SDiSearch(routeB, vCount, graph, vCount);
+        int b1 = SDiSearch(1, vCount, graph, routeB);
+        int b2 = SDiSearch(routeB, vCount, graph, routeA);
+        int b3 = SDiSearch(routeA, vCount, graph, vCount);
+
+        long A = a1 + a2 + a3;
+        long B = b1 + b2 + b3;
+
+        long answer = Math.Min(A, B);
+        if (a1 == -1 || a2 == -1 || a3 == -1)
+        {
+            answer = -1;
+        }
+
+        Console.WriteLine(answer);
+    }
+
+    static void SInsertWeight(int _startV, int _endV, int _weight, Dictionary<int, int>[] _graph)
+    {
+        Dictionary<int, int> startDic = _graph[_startV];
+        if (startDic == null)
+        {
+            startDic = new();
+            _graph[_startV] = startDic;
+        }
+        if (startDic.ContainsKey(_endV))
+        {
+            startDic[_endV] = Math.Min(startDic[_endV], _weight);
+        }
+        else
+        {
+            startDic.Add(_endV, _weight);
+        }
+
+        Dictionary<int, int> endDic = _graph[_endV];
+        if (endDic == null)
+        {
+            endDic = new();
+            _graph[_endV] = endDic;
+        }
+        if (endDic.ContainsKey(_startV))
+        {
+            endDic[_startV] = Math.Min(endDic[_startV], _weight);
+        }
+        else
+        {
+            endDic.Add(_startV, _weight);
+        }
+    }
+
+    static int SDiSearch(int _start, int _vCount, Dictionary<int, int>[] _graph, int _end)
+    {
+        int[] distance = new int[_vCount + 1];
+        for (int i = 0; i < distance.Length; i++)
+        {
+            distance[i] = int.MaxValue; //최대거리로 초기화하고
+        }
+        distance[_start] = 0; //시작은 0으로하고
+
+        PriorityQueue<int, int> que = new();
+        que.Enqueue(_start, 0); //시작정점과 여기까지의 거리 0을 넣고
+
+        while (que.Count > 0)
+        {
+            int currentV = que.Dequeue(); //거리가 제일 짧은 녀석을 뽑고
+            Dictionary<int, int> currentPath = _graph[currentV];
+            if (currentPath == null)
+            {
+                continue;
+            }
+            foreach (KeyValuePair<int, int> item in currentPath)
+            {
+                int nextV = item.Key; //갈 수 있는 정점
+                int weight = item.Value; //그 정점까지의 가중치
+
+                int newWeight = distance[currentV] + weight; //현재위치까지 왔던 값에 가중치를 더함
+
+                if (newWeight < distance[nextV])
+                {
+                    //새로 갱신된 경로가 기존 경로보다 짧으면
+                    distance[nextV] = newWeight; //거기까지 가는 경로 길이를 수정하고
+                    que.Enqueue(nextV, newWeight); //nextV 까지 가는 거리로 추가 
+                }
+            }
+        }
+
+        int minDistance = distance[_end];
+        if (minDistance == int.MaxValue)
+        {
+            minDistance = -1;
+        }
+        return minDistance;
+    }
+    #endregion
+
+    #region 이진검색트리
+    class BSTree
+    {
+        private BsTreeNode _root;
+
+        public void Insert(int data)
+        {
+            //루트가 null 인가?
+            // null이면 루트 노드를 만든다.
+            BsTreeNode node = new BsTreeNode(data, null, this);
+            if (_root == null)
+            {
+                _root = node;
                 return;
             }
-            int node = int.Parse(command);
-            
-            if(node < parent)
+
+            _root.Insert(node);
+        }
+
+        public List<int> PreOrder()
+        {
+            List<int> dataList = new();
+            if (_root == null)
             {
-                binaryTree[parent, 1] = node;
-                parent = node;
-                continue;
+                return dataList;
+            }
+
+            _root.PreOrder(dataList);
+            return dataList;
+        }
+
+        public List<int> InOrderSearch()
+        {
+            List<int> dataList = new();
+            if (_root == null)
+            {
+                //null 객체? 
+                return dataList;
+            }
+
+            _root.LeftOrder(dataList);
+            return dataList;
+        }
+
+        public List<int> LevelOrderSearch()
+        {
+            List<int> dataList = new();
+            if (_root == null)
+            {
+                //null 객체? 
+                return dataList;
+            }
+
+            _root.LevelOrder(dataList);
+            return dataList;
+        }
+
+        public bool Contains(int findData)
+        {
+            if (_root == null)
+            {
+                return false;
+            }
+
+            return _root.FindValue(findData);
+        }
+    }
+
+    class BsTreeNode
+    {
+        private int _data;
+        private BsTreeNode? _left;
+        private BsTreeNode? _right;
+        public BsTreeNode Parent { get; private set; }
+        private BSTree? _tree;
+
+        public BsTreeNode(int data, BsTreeNode parent, BSTree tree)
+        {
+            _data = data;
+            Parent = parent;
+            _tree = tree;
+        }
+
+        public void Insert(BsTreeNode node)
+        {
+            int nodeValue = node._data;
+            if (nodeValue <= _data)
+            {
+                if (_left == null)
+                {
+                    _left = node;
+                    node.Parent = this;
+                }
+                else
+                {
+                    _left.Insert(node);
+                }
+            }
+            else
+            {
+                if (_right == null)
+                {
+                    _right = node;
+                    node.Parent = this;
+                }
+                else
+                {
+                    _right.Insert(node);
+                }
+            }
+        }
+
+        public void PreOrder(List<int> dataList)
+        {
+            dataList.Add(_data);
+            if (_left != null)
+            {
+                _left.PreOrder(dataList);
+            }
+            if (_right != null)
+            {
+                _right.PreOrder(dataList);
+            }
+        }
+
+        public void LeftOrder(List<int> dataList)
+        {
+
+            if (_left != null)
+            {
+                _left.LeftOrder(dataList);
+            }
+            dataList.Add(_data);
+            if (_right != null)
+            {
+                _right.LeftOrder(dataList);
+            }
+        }
+
+        public void LastOrder(List<int> dataList)
+        {
+            if (_left != null)
+            {
+                _left.LastOrder(dataList);
+            }
+            if (_right != null)
+            {
+                _right.LastOrder(dataList);
+            }
+            dataList.Add(_data);
+        }
+
+        public void LevelOrder(List<int> dataList)
+        {
+            Queue<BsTreeNode> nodeQu = new();
+            nodeQu.Enqueue(this); //루트 노드 집어넣기
+            dataList.Add(_data);
+            while (nodeQu.Count > 0)
+            {
+                BsTreeNode node = nodeQu.Dequeue();
+
+                if (node._left != null)
+                {
+                    nodeQu.Enqueue(node._left);
+                    dataList.Add(node._left._data);
+                }
+                if (node._right != null)
+                {
+                    nodeQu.Enqueue(node._right);
+                    dataList.Add(node._right._data);
+                }
             }
 
         }
+
+        public bool FindValue(int findValue)
+        {
+            if (findValue == _data)
+            {
+                return true;
+            }
+
+            //자식 둘 중 있으면 트루 
+            bool leftFind = false;
+            if (_left != null && findValue <= _data)
+            {
+                leftFind = _left.FindValue(findValue);
+            }
+            bool rightFind = false;
+            if (_right != null && _data < findValue)
+            {
+                rightFind = _right.FindValue(findValue);
+            }
+
+            if (leftFind || rightFind)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
     #endregion
+
+    static void Main()
+    {
+        
+    }
+
+    #region 동생찾기
+    static void FindBrother()
+    {
+        string[] command = Console.ReadLine().Split();
+        int subin = int.Parse(command[0]);
+        int young = int.Parse(command[1]);
+
+    }
+    #endregion
+
 }
 
