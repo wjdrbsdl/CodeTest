@@ -64,152 +64,7 @@ public class Tree
     }
     #endregion
 
-    #region 힙 구현하기
 
-    static void TestMinHeap()
-    {
-        int commandCount = int.Parse(Console.ReadLine());
-        MinHeap minHeap = new();
-        StringBuilder sb = new();
-        for (int i = 0; i < commandCount; i++)
-        {
-            int command = int.Parse(Console.ReadLine());
-            if (command == 0)
-            {
-                sb.AppendLine(minHeap.Dequeue().ToString());
-            }
-            else
-            {
-                minHeap.Enqueue(command);
-            }
-
-        }
-        Console.WriteLine(sb);
-    }
-
-    class MinHeap
-    {
-
-
-        //트리를 배열로 구현 - 모든 노드 정보가 배열에 표현(인덱스가 보유) 
-        // 내 자식을 찾아가려면 인덱스가 필요
-        //인덱스 규칙만으로 자식, 부모가 산출되어야 한다. 
-        // + 중간 노드가 비는 경우가 발생할 수 있는데, 힙은 완전트리로서 중간에 비는게 없어서 배열로 해도 낭비가 없다.
-        private List<int> _tree = new();
-
-        //Peek
-        //입력 : 없음
-        //출력 : 최소 원소 -> 루트 노드 값 -> 0번
-        public int Peek()
-        {
-            return _tree[0];
-        }
-
-        //Enqueue
-        public void Enqueue(int newValue)
-        {
-            //1. 맨 끝에 넣는다
-            _tree.Add(newValue);
-
-            //2. 부모랑 비교해서 자식 크기가 작으면, 부모랑 바꾼다. 
-            // -> 위를 반복한다. 
-            int childIdx = _tree.Count - 1;
-            while (childIdx != 0)
-            {
-                int parentIdx = ((childIdx - 1) / 2);
-
-                if (_tree[parentIdx] <= _tree[childIdx])
-                {
-                    //부모가 자식보다 작으면 아무일 없음
-                    return;
-                }
-
-                //자식이 더 작으면 부모와 위치를 바꾼다
-                int tempValue = _tree[parentIdx];
-                _tree[parentIdx] = _tree[childIdx];
-                _tree[childIdx] = tempValue;
-
-                childIdx = parentIdx; //자식 인덱스를 부모 인덱스로 바꾼뒤 계속 진행한다
-            }
-
-        }
-
-        //Dequeue
-        public int Dequeue()
-        {
-            if (_tree.Count == 0)
-            {
-                return 0;
-            }
-            int minValue = _tree[0];
-            int lastIdx = _tree.Count - 1;
-            int lastValue = _tree[lastIdx];
-            //1. 맨 마지막 원소를 루트노드로 이동하기
-            _tree[0] = lastValue; //루트노드에 마지막 값 넣고
-            _tree.RemoveAt(lastIdx); //마지막 원소 제거
-
-            //2. 힙불변성 유지 위해 부모로부터 자식과 비교시작
-            int parentIdx = 0;
-            while (parentIdx < _tree.Count)
-            {
-                int parentValue = _tree[parentIdx];
-                int leftIdx = (parentIdx + 1) * 2 - 1;
-                int rightIdx = (parentIdx + 1) * 2;
-
-                //3. 자식 없으면 끝
-                if (_tree.Count <= leftIdx)
-                {
-                    return minValue;
-                }
-                int leftValue = _tree[leftIdx];
-                if (_tree.Count <= rightIdx)
-                {
-                    //오른쪽 자식 없으면 왼쪽자식하고만 비교
-                    if (leftValue < parentValue)
-                    {
-                        _tree[leftIdx] = parentValue;
-                        _tree[parentIdx] = leftValue;
-                        parentIdx = leftIdx;
-                        //그리고 탐색 진행
-                        continue;
-                    }
-                    //부모가 더 작으면 종료
-                    return minValue;
-                }
-
-                int rightValue = _tree[rightIdx];
-                if (leftValue < rightValue)
-                {
-                    //왼쪽 자식이 작으면 왼쪽 자식하고 부모 비교
-                    if (leftValue < parentValue)
-                    {
-                        _tree[leftIdx] = parentValue;
-                        _tree[parentIdx] = leftValue;
-                        parentIdx = leftIdx;
-                        //그리고 탐색 진행
-                        continue;
-                    }
-                    //부모가 더 작으면 종료
-                    return minValue;
-                }
-                //오른쪽 자식이 작으면 오른쪽 자식하고 부모 비교
-                if (rightValue < parentValue)
-                {
-                    _tree[rightIdx] = parentValue;
-                    _tree[parentIdx] = rightValue;
-                    parentIdx = rightIdx;
-                    //그리고 탐색 진행
-                    continue;
-                }
-                return minValue;
-            }
-
-            //부모가 더 작으면 종료
-            return minValue;
-        }
-    }
-
-    #endregion
 
     #region 다익스트라
     const int INF = 987654321; //해당 값이 나오면 연결 안 된 것. 
@@ -240,7 +95,7 @@ public class Tree
             distanceRecord[i] = INF;
         }
         distanceRecord[start] = 0;
-        int[] path  = new int[graph.Length];
+        int[] path = new int[graph.Length];
         for (int i = 0; i < path.Length; i++)
         {
             path[i] = NoWay;
@@ -274,7 +129,7 @@ public class Tree
         Stack<int> pathStack = new();
         int cur = goal;
         pathStack.Push(goal);
-        while(cur != start)
+        while (cur != start)
         {
             int pre = path[cur];
             pathStack.Push(pre);
@@ -292,7 +147,70 @@ public class Tree
 
     #endregion
 
- 
+    #region 전위입력후위출력
+    static void FirstSearch()
+    {
+        int[,] binaryTree = new int[100001, 3];
+        int root = int.Parse(Console.ReadLine());
+        binaryTree[root, 0] = int.MaxValue;
+        string command;
+        while ((command = Console.ReadLine()) != null)
+        {
+            if (command == "")
+            {
+                break;
+            }
+            int node = int.Parse(command);
+
+            Insert(node, binaryTree, root);
+
+        }
+
+        SayLayter(root, binaryTree);
+    }
+
+    static void Insert(int _value, int[,] _graph, int _parent)
+    {
+        //부모보다 낮으면 왼쪽에
+        if (_value < _parent)
+        {
+            //이미 왼쪽에 있으면 왼쪽 리프에서 재진행
+            if (_graph[_parent, 1] == 0)
+            {
+                _graph[_parent, 1] = _value;
+                _graph[_value, 0] = _parent;
+            }
+            else
+            {
+                Insert(_value, _graph, _graph[_parent, 1]);
+            }
+            return;
+        }
+
+        if (_graph[_parent, 2] == 0)
+        {
+            _graph[_parent, 2] = _value;
+            _graph[_value, 0] = _parent;
+            return;
+        }
+        Insert(_value, _graph, _graph[_parent, 2]);
+    }
+
+    static void SayLayter(int _start, int[,] _graph)
+    {
+        if (_graph[_start, 1] != 0)
+        {
+            SayLayter(_graph[_start, 1], _graph);
+        }
+        if (_graph[_start, 2] != 0)
+        {
+            SayLayter(_graph[_start, 2], _graph);
+        }
+
+        Console.WriteLine(_start.ToString());
+    }
+    #endregion
+
     #region A*
     const int MAX_Y = 10;
     const int MAX_X = 10;
@@ -355,7 +273,7 @@ public class Tree
     static int GetHeuristic(int _x1, int _y1, int _x2, int _y2)
     {
         //맨해튼 방식
-       return Math.Abs(_x1 - _x2) + Math.Abs(_y2 - _y1);
+        return Math.Abs(_x1 - _x2) + Math.Abs(_y2 - _y1);
     }
 
     static void SetPath()
@@ -407,7 +325,7 @@ public class Tree
                 if (nextNode.F > f)
                 {
                     nextNode.F = f;
-                    if(nextNode.X == endX && nextNode.Y == endY)
+                    if (nextNode.X == endX && nextNode.Y == endY)
                     {
 
                     }
@@ -419,46 +337,315 @@ public class Tree
 
         Stack<AstarNode> pathStack = new();
         AstarNode curNode = pathMap[endY, endX];
-        while(curNode.X != startX && curNode.Y != startY)
+        while (curNode.X != startX && curNode.Y != startY)
         {
             AstarNode pre = curNode.Path;
-            Console.WriteLine(pre.X +" "+pre.Y);
+            Console.WriteLine(pre.X + " " + pre.Y);
             curNode = pre;
         }
     }
 
     #endregion
 
-    static void Main()
+    #region 최대힙
+    public class MaxHeap
     {
-        ConstructMap();
-        AStar();
-        SetPath();
+        List<int> list;
+        public MaxHeap()
+        {
+            list = new();
+            list.Add(-1);
+        }
+
+        public void Enque(int _value)
+        {
+            list.Add(_value);
+            int childIdx = list.Count - 1;
+            while (childIdx != 1)
+            {
+                int parentIdx = childIdx / 2;
+                int parentValue = list[parentIdx];
+                int childValue = list[childIdx];
+                //부모보다 내가 크면 위로 올라갈것
+                if (childValue < parentValue)
+                {
+                    break;
+                }
+                list[childIdx] = parentValue;
+                list[parentIdx] = childValue;
+                childIdx = parentIdx;
+            }
+        }
+
+        public int Deque()
+        {
+            if (list.Count == 1)
+            {
+                return 0;
+            }
+            int maxValue = list[1];
+            int lastIdx = list.Count - 1;
+            list[1] = list[lastIdx]; //맨 끝값을 앞으로
+            list.RemoveAt(lastIdx); //맨끝 잘라내고
+            int parentIdx = 1;
+            if (list.Count == 1)
+            {
+                return maxValue;
+            }
+            int parentValue = list[parentIdx];
+
+            while (true)
+            {
+                int rightChildIdx = parentIdx * 2 + 1;
+                int leftChildIdx = rightChildIdx - 1;
+                if (rightChildIdx < list.Count)
+                {
+                    //오른쪽 유효하다면
+                    int rightValue = list[rightChildIdx];
+                    int leftValues = list[leftChildIdx];
+                    //둘중에 큰거랑 비교
+                    if (leftValues < rightValue)
+                    {
+                        if (parentValue < rightValue)
+                        {
+                            list[parentIdx] = rightValue;
+                            list[rightChildIdx] = parentValue;
+                            parentIdx = rightChildIdx;
+                            continue;
+                        }
+                        else
+                        {
+                            //부모가 더크면 종료
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (parentValue < leftValues)
+                        {
+                            list[parentIdx] = leftValues;
+                            list[leftChildIdx] = parentValue;
+                            parentIdx = leftChildIdx;
+                            continue;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (leftChildIdx < list.Count)
+                {
+                    int leftValue = list[leftChildIdx];
+                    if (parentValue < leftValue)
+                    {
+                        list[parentIdx] = leftValue;
+                        list[leftChildIdx] = parentValue;
+                        parentIdx = leftChildIdx;
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                break; //자식이 없으면 종료
+            }
+
+            return maxValue;
+        }
     }
 
-    #region 전위입력후위출력
-    static void FirstSearch()
+    static void TestMaxHeap()
     {
-        int[,] binaryTree = new int[100001, 3];
-        int parent = int.Parse(Console.ReadLine());
-        while (true)
+        int commandCount = int.Parse(Console.ReadLine());
+        MaxHeap heap = new();
+        for (int i = 0; i < commandCount; i++)
         {
-            string command = Console.ReadLine();
-            if (command == null)
+            int command = int.Parse(Console.ReadLine());
+            if (command == 0)
             {
-                return;
-            }
-            int node = int.Parse(command);
-            
-            if(node < parent)
-            {
-                binaryTree[parent, 1] = node;
-                parent = node;
+                Console.WriteLine(heap.Deque());
                 continue;
             }
-
+            heap.Enque(command);
         }
     }
     #endregion
+
+    static void Main()
+    {
+        TestAbsHeap();
+    }
+
+    #region 힙 구현하기
+
+    static void TestAbsHeap()
+    {
+        int commandCount = int.Parse(Console.ReadLine());
+        AbsHeap minHeap = new();
+        StringBuilder sb = new();
+        for (int i = 0; i < commandCount; i++)
+        {
+            long command = long.Parse(Console.ReadLine());
+            if (command == 0)
+            {
+                sb.AppendLine(minHeap.Dequeue().ToString());
+            }
+            else
+            {
+                minHeap.Enqueue(command);
+            }
+
+        }
+        Console.WriteLine(sb);
+    }
+
+    class AbsHeap
+    {
+
+
+        //트리를 배열로 구현 - 모든 노드 정보가 배열에 표현(인덱스가 보유) 
+        // 내 자식을 찾아가려면 인덱스가 필요
+        //인덱스 규칙만으로 자식, 부모가 산출되어야 한다. 
+        // + 중간 노드가 비는 경우가 발생할 수 있는데, 힙은 완전트리로서 중간에 비는게 없어서 배열로 해도 낭비가 없다.
+        private List<long> _tree = new();
+
+        //Peek
+        //입력 : 없음
+        //출력 : 최소 원소 -> 루트 노드 값 -> 0번
+        public long Peek()
+        {
+            return _tree[0];
+        }
+
+        //Enqueue
+        public void Enqueue(long newValue)
+        {
+            //1. 맨 끝에 넣는다
+            _tree.Add(newValue);
+
+            //2. 부모랑 비교해서 자식 크기가 작으면, 부모랑 바꾼다. 
+            // -> 위를 반복한다. 
+            int childIdx = _tree.Count - 1;
+            while (childIdx != 0)
+            {
+                int parentIdx = ((childIdx - 1) / 2);
+                long parentValue = _tree[parentIdx];
+                long childValue = _tree[childIdx];
+
+          
+                if(IsLeftSmall(parentValue, childValue) == true)
+                {
+                    return;
+                }
+
+                //자식이 더 작으면 부모와 위치를 바꾼다
+                _tree[parentIdx] = childValue;
+                _tree[childIdx] = parentValue;
+
+                childIdx = parentIdx; //자식 인덱스를 부모 인덱스로 바꾼뒤 계속 진행한다
+            }
+
+        }
+
+        //Dequeue
+        public long Dequeue()
+        {
+            if (_tree.Count == 0)
+            {
+                return 0;
+            }
+            long minValue = _tree[0];
+            int lastIdx = _tree.Count - 1;
+            long lastValue = _tree[lastIdx];
+            //1. 맨 마지막 원소를 루트노드로 이동하기
+            _tree[0] = lastValue; //루트노드에 마지막 값 넣고
+            _tree.RemoveAt(lastIdx); //마지막 원소 제거
+
+            //2. 힙불변성 유지 위해 부모로부터 자식과 비교시작
+            int parentIdx = 0;
+            while (parentIdx < _tree.Count)
+            {
+                long parentValue = _tree[parentIdx];
+                int leftIdx = (parentIdx + 1) * 2 - 1;
+                int rightIdx = (parentIdx + 1) * 2;
+
+                //3. 자식 없으면 끝
+                if (_tree.Count <= leftIdx)
+                {
+                    return minValue;
+                }
+                long leftValue = _tree[leftIdx];
+                if (_tree.Count <= rightIdx)
+                {
+                    //오른쪽 자식 없으면 왼쪽자식하고만 비교
+                    if (IsLeftSmall(leftValue, parentValue) == true)
+                    {
+                        //절댓값으로 먼저 따지고 
+                        _tree[leftIdx] = parentValue;
+                        _tree[parentIdx] = leftValue;
+                        parentIdx = leftIdx;
+                        //그리고 탐색 진행
+                        continue;
+                    }
+                    //부모가 더 작으면 종료
+                    return minValue;
+                }
+
+                long rightValue = _tree[rightIdx];
+
+                if (IsLeftSmall(leftValue, rightValue)) //왼쪽이 더 작은 경우
+                {
+                    //오른쪽 자식 없으면 왼쪽자식하고만 비교
+                    if (IsLeftSmall(leftValue, parentValue) == true)
+                    {
+                        //절댓값으로 먼저 따지고 
+                        _tree[leftIdx] = parentValue;
+                        _tree[parentIdx] = leftValue;
+                        parentIdx = leftIdx;
+                        //그리고 탐색 진행
+                        continue;
+                    }
+                    //부모가 더 작으면 종료
+                    return minValue;
+                }
+                //오른쪽 자식이 작으면 오른쪽 자식하고 부모 비교
+                if (IsLeftSmall(rightValue,parentValue) == true)
+                {
+                    _tree[rightIdx] = parentValue;
+                    _tree[parentIdx] = rightValue;
+                    parentIdx = rightIdx;
+                    //그리고 탐색 진행
+                    continue;
+                }
+   
+                return minValue;
+            }
+
+            //부모가 더 작으면 종료
+            return minValue;
+        }
+
+        bool IsLeftSmall(long _left, long _right)
+        {
+            //절댓값으로 왼쪽이 작으면 왼쪽이 작은거
+            if(Math.Abs(_left) < Math.Abs(_right))
+            {
+                return true;
+            }
+            //절댓값으론 같다면 실제로 왼쪽값이 작을때 
+            else if(Math.Abs(_left) == Math.Abs(_right) && _left < _right)
+            {
+                return true;
+            }
+            //절댓값이 왼쪽이 더 크면 false 인거지.
+            return false;
+        }
+    }
+
+    #endregion
+
 }
 
