@@ -64,8 +64,6 @@ public class Tree
     }
     #endregion
 
-
-
     #region 다익스트라
     const int INF = 987654321; //해당 값이 나오면 연결 안 된 것. 
     const int NoWay = -1;
@@ -474,11 +472,6 @@ public class Tree
     }
     #endregion
 
-    static void Main()
-    {
-        TestAbsHeap();
-    }
-
     #region 힙 구현하기
 
     static void TestAbsHeap()
@@ -535,8 +528,8 @@ public class Tree
                 long parentValue = _tree[parentIdx];
                 long childValue = _tree[childIdx];
 
-          
-                if(IsLeftSmall(parentValue, childValue) == true)
+
+                if (IsLeftSmall(parentValue, childValue) == true)
                 {
                     return;
                 }
@@ -612,7 +605,7 @@ public class Tree
                     return minValue;
                 }
                 //오른쪽 자식이 작으면 오른쪽 자식하고 부모 비교
-                if (IsLeftSmall(rightValue,parentValue) == true)
+                if (IsLeftSmall(rightValue, parentValue) == true)
                 {
                     _tree[rightIdx] = parentValue;
                     _tree[parentIdx] = rightValue;
@@ -620,7 +613,7 @@ public class Tree
                     //그리고 탐색 진행
                     continue;
                 }
-   
+
                 return minValue;
             }
 
@@ -631,12 +624,12 @@ public class Tree
         bool IsLeftSmall(long _left, long _right)
         {
             //절댓값으로 왼쪽이 작으면 왼쪽이 작은거
-            if(Math.Abs(_left) < Math.Abs(_right))
+            if (Math.Abs(_left) < Math.Abs(_right))
             {
                 return true;
             }
             //절댓값으론 같다면 실제로 왼쪽값이 작을때 
-            else if(Math.Abs(_left) == Math.Abs(_right) && _left < _right)
+            else if (Math.Abs(_left) == Math.Abs(_right) && _left < _right)
             {
                 return true;
             }
@@ -647,5 +640,758 @@ public class Tree
 
     #endregion
 
+    #region 숨바3 13549
+    static void RunBro()
+    {
+        string[] command = Console.ReadLine().Split();
+        int subin = int.Parse(command[0]);
+        int bro = int.Parse(command[1]);
+
+
+        PriorityQueue<int, int> pq = new();
+        int[] visited = new int[100_005];
+        for (int i = 0; i < visited.Length; i++)
+        {
+            visited[i] = int.MaxValue;
+        }
+        visited[subin] = 0;
+        int f = visited[subin];
+        pq.Enqueue(subin, f);
+        int[] path = new int[100_005];
+        while (pq.Count > 0)
+        {
+            int current = pq.Dequeue();
+
+            if (current == bro)
+            {
+                break;
+            }
+
+            int[] dx = { -1, 1, current };
+            int[] dW = { 1, 1, 0 };
+            for (int i = 0; i < 3; i++)
+            {
+                int nx = current + dx[i];
+                if (0 <= nx && nx <= 100000)
+                {
+                    int weight = visited[current] + dW[i];
+                    if (weight < visited[nx])
+                    {
+                        visited[nx] = weight;
+                        path[nx] = current;
+                        pq.Enqueue(nx, weight);
+                    }
+                }
+            }
+        }
+        Console.WriteLine(visited[bro]);
+        //int cur = bro;
+        //while (true)
+        //{
+        //    int pre = path[cur];
+        //    Console.WriteLine(pre);
+        //    if(pre == 0)
+        //    {
+        //        break;
+        //    }
+        //    cur = pre;
+        //}
+    }
+
+    static int BroHue(int _cur, int _bro)
+    {
+        return Math.Abs(_bro - _cur);
+    }
+    #endregion
+
+    #region 요원 9370
+    static void Hidden()
+    {
+        int testCase = int.Parse(Console.ReadLine());
+        for (int z = 0; z < testCase; z++)
+        {
+            string[] commandStr = Console.ReadLine().Split();
+            int nodeCount = int.Parse(commandStr[0]); // 노드 수
+            int lineCount = int.Parse(commandStr[1]); //간선 수
+            int guessCount = int.Parse(commandStr[2]); //후보 수
+            string[] infoStr = Console.ReadLine().Split();
+            int startNode = int.Parse(infoStr[0]); //예술가 출발지
+            int passNode1 = int.Parse(infoStr[1]); //건너간 노드
+            int passNode2 = int.Parse(infoStr[2]); //건너간 노드
+            List<int[]>[] graph = new List<int[]>[nodeCount + 1]; //각 노드에서 다른노드까지 간선, 비중 저장
+            for (int x = 0; x < nodeCount + 1; x++)
+            {
+                graph[x] = new List<int[]>();
+            }
+
+            for (int lineInfoIdx = 0; lineInfoIdx < lineCount; lineInfoIdx++)
+            {
+                string[] lineStr = Console.ReadLine().Split();
+                int lineStartNode = int.Parse(lineStr[0]);
+                int lineEndNode = int.Parse(lineStr[1]);
+                int lineWeight = int.Parse(lineStr[2]);
+
+                //양방향 정보 입력
+                int[] goal = { lineEndNode, lineWeight };
+                graph[lineStartNode].Add(goal);
+                int[] back = { lineStartNode, lineWeight };
+                graph[lineEndNode].Add(back);
+            }
+            List<int> guessList = new List<int>();
+            for (int guessInfo = 0; guessInfo < guessCount; guessInfo++)
+            {
+                int guessNode = int.Parse(Console.ReadLine());
+                guessList.Add(guessNode);
+            }
+
+            //출발에서 먼저 가야하는 노드들 
+            //후보까지 가는 루트에서 pass1과 2를 포함하는 후보들
+
+            //int[] route = MinRoute(graph, startNode);
+            //PriorityQueue<int, int> rank = new();
+            //for (int i = 0; i < guessList.Count; i++)
+            //{
+            //    int goal = guessList[i];
+            //    int back = route[goal];
+            //    bool[] find = { false, false};
+            //    int[] haveTo = { passNode1, passNode2 };
+            //    while (back != 0)
+            //    {
+            //        if(back == haveTo[0])
+            //        {
+            //            find[0] = true;
+            //        }
+            //        else if(back == haveTo[1])
+            //        {
+            //            find[1] = true;
+            //        }
+            //        if (find[0] == true && find[1] == true)
+            //        {
+            //            //2경로를 지나쳤으면
+            //            rank.Enqueue(goal, goal);
+            //            break;
+            //        }
+            //        back = route[back];
+            //    }
+            //}
+
+            int[] minDisA = MinDistance(graph, startNode);
+            int[] minDis1 = MinDistance(graph, passNode1);
+            int[] minDis2 = MinDistance(graph, passNode2);
+            List<int[]> pass = graph[passNode1];
+            int passDistance = 0;
+            PriorityQueue<int, int> rank = new();
+            for (int i = 0; i < pass.Count; i++)
+            {
+                if (pass[i][0] == passNode2)
+                {
+                    passDistance = pass[i][1];
+                    break;
+                }
+            }
+            for (int i = 0; i < guessList.Count; i++)
+            {
+                int goal = guessList[i];
+                int passDis = passDistance;
+                int route1 = minDisA[passNode1] + minDis2[goal] + passDis;
+                int route2 = minDisA[passNode2] + minDis1[goal] + passDis;
+                if (route1 == minDisA[goal] || route2 == minDisA[goal])
+                {
+                    rank.Enqueue(goal, goal);
+                }
+            }
+
+
+            StringBuilder sb = new();
+            while (rank.Count > 0)
+            {
+                sb.Append(rank.Dequeue().ToString() + " ");
+            }
+            sb.Remove(sb.Length - 1, 1);
+            Console.WriteLine(sb);
+        }
+    }
+
+    static int[] MinDistance(List<int[]>[] _graph, int _start)
+    {
+        int[] distanceInfo = new int[_graph.Length];
+        int[] routeInfo = new int[_graph.Length];
+        //시작점으로부터 다른 노드까지의 모든 거리를 반환
+        for (int i = 0; i < distanceInfo.Length; i++)
+        {
+            distanceInfo[i] = int.MaxValue;
+        }
+        distanceInfo[_start] = 0;
+        PriorityQueue<int, int> pq = new();
+        pq.Enqueue(_start, 0);
+        while (pq.Count > 0)
+        {
+            int current = pq.Dequeue();
+
+            List<int[]> nextNodeList = _graph[current];//현재 노드에서 갈수있는 다른 노드
+            for (int i = 0; i < nextNodeList.Count; i++)
+            {
+                int nextNode = nextNodeList[i][0]; // [][] [0]은 노드 번호 [1]은 거리
+                int nextWeight = distanceInfo[current] + nextNodeList[i][1]; //현재 루트를 지날때 다음노드의 가중치
+                if (nextWeight < distanceInfo[nextNode])
+                {
+                    //현재 노드를 지나는게 더 짧은 거리라면
+                    distanceInfo[nextNode] = nextWeight;
+                    routeInfo[nextNode] = current; //지나온 족적 기록
+                    pq.Enqueue(nextNode, nextWeight);
+                }
+            }
+        }
+        return distanceInfo;
+    }
+    #endregion
+
+    #region babyShark
+    static void BabyShark()
+    {
+        int mapSize = int.Parse(Console.ReadLine());
+        int[,] map = new int[mapSize, mapSize];
+        int sharkY = 0;
+        int sharkX = 0;
+        for (int i = 0; i < mapSize; i++)
+        {
+            string[] mapInfo = Console.ReadLine().Split();
+            for (int x = 0; x < mapSize; x++)
+            {
+                int info = int.Parse(mapInfo[x]);
+                map[i, x] = info;
+                if (info == 9)
+                {
+                    sharkY = i;
+                    sharkX = x;
+                }
+            }
+        }
+
+        int sharkSize = 2;
+
+        int findFish = 1;
+        int passTime = 0;
+        int needFood = sharkSize;
+        while (findFish != 0)
+        {
+            List<(int, int, int)> fishiList = EatBfs(map, sharkX, sharkY, sharkSize, mapSize);
+            if (fishiList.Count == 0)
+            {
+                //먹을 물고기 없으면 끝
+                break;
+            }
+
+            fishiList.Sort((a, b) =>
+            {
+                //거리순 정렬
+                int compare = a.Item3.CompareTo(b.Item3);
+                //높이순 정렬
+                if (compare == 0)
+                {
+                    compare = a.Item1.CompareTo(b.Item1);
+                }
+                //했는데도 0이면
+                if (compare == 0)
+                {
+                    //왼쪽순 정렬
+                    compare = a.Item2.CompareTo(b.Item2);
+                }
+                return compare;
+            });
+            //0번째 물고기를 먹을거야
+            int distance = fishiList[0].Item3;
+            int y = fishiList[0].Item1;
+            int x = fishiList[0].Item2;
+            passTime += distance;
+            needFood -= 1;
+            if (needFood == 0)
+            {
+                sharkSize += 1;
+                needFood = sharkSize;
+            }
+            map[y, x] = 9;
+            map[sharkY, sharkX] = 0;
+            sharkY = y;
+            sharkX = x;
+        }
+        Console.WriteLine(passTime);
+    }
+
+
+    static List<(int, int, int)> EatBfs(int[,] _map, int _startX, int _startY, int _sharkSize, int _mapSize)
+    {
+        int[,] visited = new int[_mapSize, _mapSize];
+        Queue<(int, int, int)> sq = new();
+        sq.Enqueue((_startY, _startX, 0));
+        int sharkSize = _sharkSize;
+        int eatPoint = _sharkSize;
+        visited[_startY, _startX] = 1;
+        List<(int, int, int)> fishList = new(); //먹을수 있는 목록
+        while (sq.Count > 0)
+        {
+
+            (int, int, int) curInfo = sq.Dequeue();
+
+            int curY = curInfo.Item1;
+            int curX = curInfo.Item2;
+            int dis = curInfo.Item3;
+            int[] dy = { -1, 0, 0, 1 };
+            int[] dx = { 0, -1, 1, 0 };
+            for (int i = 0; i < 4; i++)
+            {
+                int ny = curY + dy[i];
+                int nx = curX + dx[i];
+                //Console.WriteLine("다음 위치"+ny + " : "+nx);
+                if (ny < 0 || nx < 0 || _mapSize <= ny || _mapSize <= nx)
+                {
+                    // Console.WriteLine("논외");
+                    continue; //벗어난 위치
+                }
+
+                if (visited[ny, nx] != 0)
+                {
+                    // Console.WriteLine("방문지");
+                    continue;
+                }
+
+                if (sharkSize < _map[ny, nx])
+                {
+                    //Console.WriteLine("나보다 큰 물고기");
+                    continue;
+                }
+
+                if (0 < _map[ny, nx] && _map[ny, nx] < sharkSize)
+                {
+                    (int, int, int) fishInfo = (ny, nx, dis + 1);
+                    fishList.Add(fishInfo);
+                }
+
+                visited[ny, nx] = 1; //방문했다 체크하고
+                sq.Enqueue((ny, nx, dis + 1));
+
+            }
+
+
+
+        }
+
+        return fishList;
+    }
+    #endregion
+
+    #region 경로찾기 11403
+    static void FindOnePath()
+    {
+        //일방향 간선
+
+        int nodeCount = int.Parse(Console.ReadLine());
+        List<int>[] graph = new List<int>[nodeCount];
+        for (int i = 0; i < nodeCount; i++)
+        {
+            List<int> able = new();
+            string[] command = Console.ReadLine().Split();
+            // able.Add(i);//자기자신은 언제나 갈수있음
+            for (int c = 0; c < command.Length; c++)
+            {
+                if (int.Parse(command[c]) == 1)
+                {
+                    able.Add(c); //갈수있는경로로 추가
+                }
+            }
+            graph[i] = able;
+        }
+        //그래프 그려놨으니 이제 갈수있는거 판단해서 하면됨.
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < nodeCount; i++)
+        {
+            sb.Clear();
+            int[] havePath = BfsOnePath(graph, i);
+            for (int x = 0; x < havePath.Length; x++)
+            {
+                sb.Append(havePath[x] + " ");
+            }
+            sb.Remove(sb.Length - 1, 1);
+            Console.WriteLine(sb);
+        }
+
+    }
+
+    static int[] BfsOnePath(List<int>[] graph, int start)
+    {
+        int[] pathRecord = new int[graph.Length];
+        Queue<int> nodeQ = new();
+        nodeQ.Enqueue(start);
+        while (nodeQ.Count > 0)
+        {
+            int current = nodeQ.Dequeue();
+            List<int> pathList = graph[current];
+            for (int i = 0; i < pathList.Count; i++)
+            {
+                int next = pathList[i];
+                if (pathRecord[next] == 0)
+                {
+                    pathRecord[next] = 1;
+                    nodeQ.Enqueue(next);
+                }
+            }
+        }
+
+        return pathRecord;
+    }
+    #endregion
+
+    #region MinBus 11404
+    static void FindCheapBus()
+    {
+        int cityCount = int.Parse(Console.ReadLine());
+        int busCount = int.Parse(Console.ReadLine());
+        Dictionary<int, int>[] busGraph = new Dictionary<int, int>[cityCount];
+        for (int i = 0; i < cityCount; i++)
+        {
+            busGraph[i] = new Dictionary<int, int>();
+        }
+
+        for (int i = 0; i < busCount; i++)
+        {
+            string[] busInfo = Console.ReadLine().Split();
+            int startCity = int.Parse(busInfo[0]) - 1;
+            int endCity = int.Parse(busInfo[1]) - 1;
+            int pay = int.Parse(busInfo[2]);
+
+            if (busGraph[startCity].ContainsKey(endCity))
+            {
+                //있으면 낮은값으로
+                busGraph[startCity][endCity] = Math.Min(busGraph[startCity][endCity], pay);
+                continue;
+            }
+            busGraph[startCity].Add(endCity, pay);
+            //시작과 도시가 같은 버스는 없다. 
+        }
+
+        string[] questStr = Console.ReadLine().Split();
+        int start = int.Parse(questStr[0]);
+        int end = int.Parse(questStr[1]);
+
+        int[] payinfo = FindBfs(busGraph, start - 1);
+        Console.WriteLine(payinfo[end - 1]);
+
+    }
+
+    static int[] FindBfs(Dictionary<int, int>[] _graph, int _start)
+    {
+        int[] payInfo = new int[_graph.Length];
+        for (int i = 0; i < payInfo.Length; i++)
+        {
+            payInfo[i] = int.MaxValue; //최대 요금으로 설정
+        }
+        payInfo[_start] = 0; //현재 위치는 0원
+        //갈수 있는 경로중 제일 싼걸로 골라서 선택
+        PriorityQueue<int, int> nextQ = new();
+        nextQ.Enqueue(_start, 0);
+        while (nextQ.Count > 0)
+        {
+            int current = nextQ.Dequeue();
+            Dictionary<int, int> nextPathList = _graph[current];
+            foreach (KeyValuePair<int, int> item in nextPathList)
+            {
+                int nextNode = item.Key;
+                int nextPay = payInfo[current] + item.Value;
+                if (nextPay < payInfo[nextNode])
+                {
+                    payInfo[nextNode] = nextPay; //제일 싼 비용으로 갱신
+                    nextQ.Enqueue(nextNode, nextPay); //갈 노드와, 그 값을 넣는다.
+                }
+            }
+
+        }
+
+        return payInfo;
+    }
+    #endregion
+
+    #region 돈뽑기
+    static void Withdraw()
+    {
+        int count = int.Parse(Console.ReadLine());
+        string[] command = Console.ReadLine().Split();
+        int[] pTime = new int[count];
+        PriorityQueue<int, int> pq = new();
+        for (int i = 0; i < pTime.Length; i++)
+        {
+            pTime[i] = int.Parse(command[i]);
+            pq.Enqueue(pTime[i], pTime[i]);
+
+        }
+
+        int totalTime = 0;
+        int preTime = 0;
+        while (pq.Count > 0)
+        {
+            int thisTime = pq.Dequeue();
+            preTime += thisTime;
+            totalTime += preTime;
+            /* 0
+             * 1 = 1
+             * 1 + 2 
+             * 1 + 2 + 3
+             * 1 + 2 + 3 + 3
+             * 1 + 2 + 3 + 3 + 4
+             */
+
+        }
+        Console.WriteLine(totalTime);
+        //기다리는 시간이 가장 낮게
+        // 1 2 3 4 5 
+        // 1은 1시간
+        // 2는 1 + 2 시간
+        // 3은 1 + 2 + 3 시간
+        // 즉 앞에 짧은걸 넣을수록 기다리는 시간이 줄어드는듯?
+
+    }
+    #endregion
+    #region n번째영화 1436
+    static void MovieName()
+    {
+        //666이 들어가야한다 
+        int n = int.Parse(Console.ReadLine());
+        int find = 0;
+        int start = 1;
+        while (find < n)
+        {
+            //숫자에 666이 들어가는건 어떻게 알 수 있나
+            string name = start.ToString();
+
+            if (name.Length >= 3)
+            {
+                int count = 0;
+                for (int i = 0; i < name.Length; i++)
+                {
+                    if (name[i] == '6')
+                    {
+                        count += 1;
+                        if (count == 3)
+                        {
+
+                            find += 1;
+                            if (find == n)
+                            {
+                                Console.WriteLine(name);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        count = 0;
+                    }
+                }
+            }
+            start += 1;
+        }
+    }
+    #endregion
+    #region N개의수업 11000
+    static void ArrangeRoom()
+    {
+        int classCount = int.Parse(Console.ReadLine());
+        List<int[]> classTime = new List<int[]>();
+        for (int i = 0; i < classCount; i++)
+        {
+            string[] timeStr = Console.ReadLine().Split();
+            int start = int.Parse(timeStr[0]);
+            int end = int.Parse(timeStr[1]);
+            classTime.Add(new int[2] { start, end });
+        }
+        //위 수업을 모두 배치하기 위해 필요한 강의실의 최소 수는?
+        //시작 시간으로 모두 정렬해야되지 않을까
+        classTime.Sort((a, b) => a[0].CompareTo(b[0]));
+        //오브젝트 풀 처럼 해야겠따
+        PriorityQueue<int, int> backTimeQ = new(); //강의 종료시간 제일 빨리끝나는걸로 담아놓기
+        int makeCount = 0;
+        for (int i = 0; i < classTime.Count; i++)
+        {
+            int startTime = classTime[i][0]; //강의 시작시간
+            int endTime = classTime[i][1];
+            if (backTimeQ.TryPeek(out int resetTime, out int prior))
+            {
+                if (resetTime <= startTime)
+                {
+                    //금방 끝나는애가 시작하려는 시간보다 앞서면 해당 강의실 쓰면됨
+                    backTimeQ.Dequeue(); //빼고
+                    backTimeQ.Enqueue(endTime, endTime); //새로 집어넣고
+                    continue;// 다음넘어가고
+                }
+                else
+                {
+                    //젤먼저 끝나는애가 시작시간보다 뒤면
+                    //꺼낼게 없으면
+                    makeCount += 1; //만든횟수 넣고
+                    backTimeQ.Enqueue(endTime, endTime); //종료시간으로 큐집어넣기
+                    continue;
+                }
+            }
+            else
+            {
+                //꺼낼게 없으면
+                makeCount += 1; //만든횟수 넣고
+                backTimeQ.Enqueue(endTime, endTime); //종료시간으로 큐집어넣기
+            }
+        }
+        Console.WriteLine(makeCount);
+    }
+    #endregion
+    #region 파티 1238
+    static void PartyPath()
+    {
+        string[] command = Console.ReadLine().Split();
+        int nodeCount = int.Parse(command[0]);
+        int lineCount = int.Parse(command[1]);
+        int place = int.Parse(command[2]);
+        List<(int, int)>[] graph = new List<(int, int)>[nodeCount + 1];
+        List<(int, int)>[] reverseGraph = new List<(int, int)>[nodeCount + 1];
+        for (int i = 0; i < nodeCount + 1; i++)
+        {
+            graph[i] = new List<(int, int)>();
+            reverseGraph[i] = new List<(int, int)>();
+        }
+        for (int i = 0; i < lineCount; i++)
+        {
+            string[] lineStr = Console.ReadLine().Split();
+            int depart = int.Parse(lineStr[0]);
+            int arrive = int.Parse(lineStr[1]);
+            int weight = int.Parse(lineStr[2]);
+            graph[depart].Add((arrive, weight));
+            reverseGraph[arrive].Add((depart, weight));
+        }
+        //그래프 그려놓음.
+        int[] max = new int[nodeCount + 1];
+        //for (int i = 1; i <= nodeCount; i++)
+        //{
+        //    int distance = (DajkiPartyPath(graph, i))[place];
+        //    max[i] += distance; //i마을에서 출발하면서 최단거리구함
+        //}
+        max = DajkiPartyPath(reverseGraph, place);
+        int[] back = DajkiPartyPath(graph, place);
+        int answer = 0;
+        for (int i = 1; i <= nodeCount; i++)
+        {
+            int final = back[i] + max[i];
+            answer = Math.Max(answer, final);
+        }
+        Console.WriteLine(answer);
+    }
+
+    static int[] DajkiPartyPath(List<(int, int)>[] graph, int _start)
+    {
+        int[] distance = new int[graph.Length];
+        for (int i = 0; i < distance.Length; i++)
+        {
+            distance[i] = int.MaxValue;
+        }
+        distance[_start] = 0;
+        PriorityQueue<int, int> pq = new();
+        pq.Enqueue(_start, 0);
+        while (pq.Count > 0)
+        {
+            int current = pq.Dequeue();
+            List<(int, int)> info = graph[current];
+            for (int i = 0; i < info.Count; i++)
+            {
+                int next = info[i].Item1;
+                int weight = distance[current] + info[i].Item2;
+                if (weight < distance[next])
+                {
+                    distance[next] = weight;
+                    pq.Enqueue(next, weight);
+                }
+            }
+        }
+        return distance;
+    }
+    #endregion
+
+    static void Main()
+    {
+        KList();
+    }
+
+
+    #region K번째 1854
+    static void KList()
+    {
+        string[] command = Console.ReadLine().Split();
+
+        int nodeCount = int.Parse(command[0]);
+        int lineCount = int.Parse(command[1]);
+        int k = int.Parse(command[2]);
+        List<(int, int)>[] graph = new List<(int, int)>[nodeCount + 1];
+        for (int i = 0; i < graph.Length; i++)
+        {
+            graph[i] = new();
+        }
+        for (int i = 0; i < lineCount; i++)
+        {
+            string[] lineStr = Console.ReadLine().Split();
+            int start = int.Parse(lineStr[0]);
+            int end = int.Parse(lineStr[1]);
+            int weight = int.Parse(lineStr[2]);
+            graph[start].Add((end, weight));
+        }
+
+        PriorityQueue<int, int>[] info = KSearch(graph, 1, k);
+        for (int i = 1; i < info.Length; i++)
+        {
+            PriorityQueue<int, int> pq = info[i];
+            if (pq.TryDequeue(out int value, out _))
+            {
+                Console.WriteLine(value);
+            }
+            else
+            {
+                Console.WriteLine(-1);
+            }
+        }
+    }
+
+    static PriorityQueue<int, int>[] KSearch(List<(int, int)>[] _graph, int _start, int _k)
+    {
+        PriorityQueue<int, int>[] priVisited = new PriorityQueue<int, int>[_graph.Length];
+        for (int i = 0; i < priVisited.Length; i++)
+        {
+            priVisited[i] = new PriorityQueue<int, int>();
+        }
+
+        Queue<(int, int)> q = new();
+        q.Enqueue((_start, 0));
+        while (q.Count > 0)
+        {
+            (int, int) curK = q.Dequeue();
+            int curN = curK.Item1;
+            int curD = curK.Item2;
+
+            List<(int, int)> nextList = _graph[curN];
+            for (int i = 0; i < nextList.Count; i++)
+            {
+                int nextN = nextList[i].Item1;
+                int nextWeight = nextList[i].Item2;
+                int newWeight = nextWeight + curD;
+                if (priVisited[nextN].Count < _k)
+                {
+                    priVisited[nextN].Enqueue((newWeight), -(newWeight));
+                    q.Enqueue((nextN, newWeight));
+                }
+                else if (priVisited[nextN].Peek() > newWeight)
+                {
+
+                    priVisited[nextN].Dequeue();
+                    priVisited[nextN].Enqueue((newWeight), -(newWeight));
+                    q.Enqueue((nextN, newWeight));
+                }
+            }
+        }
+        return priVisited;
+    }
+    #endregion
 }
+
 
