@@ -1310,11 +1310,76 @@ public class Tree
     }
     #endregion
 
-    static void Main()
+    #region N퀸문제
+    static void IamQuenn()
     {
-        KList();
+        int quest = int.Parse(Console.ReadLine());
+        //quest 너비의 판에서 quest개의 퀸을 공격할 수 없게 놓을 수 있는 방법 
+        //직선, 대각모두 - 모든 라인에 하나씩만 존재가능 첫째줄에 놓았으면 n+1부터는 앞에줄 다 패스해서 놓고
+        List<(int, int)> chessPos = new();
+        RecursionChess(0, quest, chessPos);
+        Console.WriteLine(find);
     }
 
+    static int find = 0;
+    static void RecursionChess(int _line, int _length, List<(int, int)> chess)
+    {
+        if (_line == _length)
+        {
+            //만약 최종까지 넘어왔으면 해당 로직은 된거
+            find += 1;
+
+            return;
+        }
+
+        for (int i = 0; i < _length; i++)
+        {
+            if (AbleQueen(_line, i, chess))
+            {
+                chess.Add((_line, i));
+                RecursionChess(_line + 1, _length, chess); //다음줄에 가서도 확인하도록 진행
+                //만약 위 위치를 돌고 나왔으면 이제 마지막 자기가 넣은건 빼기
+                chess.RemoveAt(chess.Count - 1);
+            }
+
+        }
+    }
+    /*
+     * [1][0][0][0][0][0][0][0]
+     * [0][0][1][0][0][0][0][0]
+     * [0][0][0][0][1][0][0][0]
+     * [0][1][0][0][0][0][0][0]
+     * [1][0][0][0][0][0][0][0] 
+     * [1][0][0][0][0][0][0][0]
+     * [1][0][0][0][0][0][0][0]
+     * [1][0][0][0][0][0][0][0]
+     */
+    static bool AbleQueen(int _checkY, int _checkX, List<(int, int)> _chessList)
+    {
+
+        for (int i = 0; i < _chessList.Count; i++)
+        {
+            int preY = _chessList[i].Item1; // 놓여있는 줄 y
+            int preX = _chessList[i].Item2; //놓여있는 x
+            //체크하려는 위치가 이전 위치와 걸리면 false 반환
+            if (preY == _checkY || preX == _checkX)
+            {
+                return false;
+            }
+
+            //대각으로도 같으면 
+            if (Math.Abs(preY - _checkY) == Math.Abs(preX - _checkX))
+            {
+                //기울기가 1이면 같은 대각라인
+                return false;
+            }
+
+        }
+
+
+        return true;
+    }
+    #endregion
 
     #region K번째 1854
     static void KList()
@@ -1391,6 +1456,215 @@ public class Tree
         }
         return priVisited;
     }
+    #endregion
+
+    static void Main()
+    {
+        Sdoku();
+    }
+
+    #region 스도쿠2580
+    static void Sdoku()
+    {
+        int[,] map = new int[9,9];
+        for (int i = 0; i < 9; i++)
+        {
+            string[] command = Console.ReadLine().Split();
+            for (int x = 0; x < 9; x++)
+            {
+                map[i, x] = int.Parse(command[x]);
+            }
+        }
+
+        //0번인 칸에 들어갈 수 있는 조합을 적어놓고, 
+        //n칸에 숫자를 하나씩 넣으면서 다른조합이 되는지 봐서 
+        List<SdokuRecord> questList = new();
+        for (int y = 0; y < 9; y++)
+        {
+            for (int x = 0; x < 9; x++)
+            {
+                if (map[y,x] == 0)
+                {
+                    List<int> need = new();
+                    SdokuRecord st = new SdokuRecord(y, x, need);
+                    questList.Add(st);
+                    CheckAble(map, y, x, st.ableList);
+                }
+            }
+        }
+
+        bool isDone = false;
+        SdokuRecursion(map, questList, 0, ref isDone);
+
+      
+    }
+
+    struct SdokuRecord
+    {
+        public int y;
+        public int x;
+        public List<int> ableList;
+
+        public SdokuRecord(int _y, int _x, List<int> _list)
+        {
+            y = _y; x = _x;
+            ableList = _list;
+        }
+
+    }
+
+    static void SdokuRecursion(int[,] _map, List<SdokuRecord> _needList, int _curIdx, ref bool _isDone)
+    {
+        //해당번째 아이템을 넣어서 아이템이 진행되는지 - 마지막 경우까지 들어갔다면 완료 된거
+        if(_needList.Count == _curIdx && _isDone == false)
+        {
+            _isDone = true; //접근한 최초 한번만 그림그리도록
+            //모든 리스트의 값들을 다 넣을 수 있었다. 답이 채워졌다.
+            StringBuilder sb = new();
+            for (int i = 0; i < 9; i++)
+            {
+                for (int x = 0; x < 9; x++)
+                {
+                    sb.Append(_map[i, x] + " ");
+                }
+                sb.Remove(sb.Length - 1, 1);
+                sb.AppendLine();
+            }
+            sb.Remove(sb.Length - 1, 1);
+
+            Console.WriteLine(sb);
+            return;
+        }
+
+        SdokuRecord curRecord = _needList[_curIdx];
+        List<int> checkNum = curRecord.ableList;
+        for (int i = 0; i < checkNum.Count; i++)
+        {
+            int inputNum = checkNum[i];
+            int posY = curRecord.y;
+            int posX = curRecord.x;
+            //그 빈칸에 이제 인풋넘버를 넣을꺼야 넣었을때 다른거랑 만족하는지 보는거야 
+            if(CheckInput(_map, posY, posX, inputNum))
+            {
+                //넣을 수 있으면 넣고
+                _map[posY, posX] = inputNum;
+                //다음 진행
+                SdokuRecursion(_map, _needList, _curIdx + 1, ref _isDone);
+            }
+            //넣었던 답 넣엇던 말던 다시 되돌리고 다른거 체크하기
+            _map[posY, posX] = 0;
+
+        }
+    }
+
+    static bool CheckInput(int[,] _map, int _y, int _x, int _inputNum)
+    {
+        //해당 위치에 해당 넘버를 넣었을때 다른거랑 겹치는지만 체크
+        //가로줄 체크
+        for (int i = 0; i < 9; i++)
+        {
+            int haveNum = _map[_y, i];
+            if(haveNum == _inputNum)
+            {
+                return false;
+            }
+        }
+        //세로줄 체크
+        for (int i = 0; i < 9; i++)
+        {
+            int haveNum = _map[i, _x];
+            if (haveNum == _inputNum)
+            {
+                return false;
+            }
+        }
+        //구역 체크
+        int startY = _y / 3;
+        startY *= 3;
+        int startX = _x / 3;
+        startX *= 3;
+        for (int y = startY; y < startY + 3; y++)
+        {
+            for (int x = startX; x < startX + 3; x++)
+            {
+                int haveNum = _map[y, x];
+                if (haveNum == _inputNum)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    static void CheckAble(int[,] _map, int _y, int _x, List<int> _record)
+    {
+        bool[] ableGaro = new bool[10];
+        //가로줄 확인
+        bool[] have = new bool[10];
+        for (int i = 0; i < 9; i++)
+        {
+            int haveNum = _map[_y, i];
+            have[haveNum] = true;
+        }
+        for (int i = 1; i <= 9; i++)
+        {
+            if (have[i] == false)
+            {
+                ableGaro[i] = true;
+            }
+        }
+
+        //세로줄 확인
+        bool[] haveSero = new bool[10];
+        bool[] ableSero = new bool[10];
+        for (int i = 0; i < 9; i++)
+        {
+            int haveNum = _map[i, _x];
+            haveSero[haveNum] = true;
+        }
+        for (int i = 1; i <= 9; i++)
+        {
+            if (haveSero[i] == false)
+            {
+                ableSero[i] = true;
+            }
+        }
+
+        //구역 확인
+        bool[] haveQuack = new bool[10];
+        bool[] ableQuack = new bool[10];
+        //0~8이고 시작은 0, 3, 6
+        int startY = _y / 3;
+        startY *= 3;
+        int startX = _x / 3;
+        startX *= 3;
+        for (int y = startY; y < startY + 3; y++)
+        {
+            for (int x = startX; x < startX + 3; x++)
+            {
+                int haveNum = _map[y, x];
+                haveQuack[haveNum] = true;
+            }
+        }
+        for (int i = 1; i <= 9; i++)
+        {
+            if (haveQuack[i] == false)
+            {
+                ableQuack[i] = true;
+            }
+        }
+
+
+        for (int i = 1; i <= 9; i++)
+        {
+            if (ableGaro[i] == true && ableSero[i] == true && ableQuack[i] == true)
+            {
+                _record.Add(i);
+            }
+        }
+    }
+
     #endregion
 }
 
