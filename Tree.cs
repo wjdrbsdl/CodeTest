@@ -1360,7 +1360,7 @@ public class Tree
         {
             priVisited[i] = new PriorityQueue<int, int>();
         }
-
+        priVisited[1].Enqueue(0, 0);
         Queue<(int, int)> q = new();
         q.Enqueue((_start, 0));
         while (q.Count > 0)
