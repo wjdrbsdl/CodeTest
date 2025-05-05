@@ -1458,15 +1458,11 @@ public class Tree
     }
     #endregion
 
-    static void Main()
-    {
-        Sdoku();
-    }
 
     #region 스도쿠2580
     static void Sdoku()
     {
-        int[,] map = new int[9,9];
+        int[,] map = new int[9, 9];
         for (int i = 0; i < 9; i++)
         {
             string[] command = Console.ReadLine().Split();
@@ -1483,7 +1479,7 @@ public class Tree
         {
             for (int x = 0; x < 9; x++)
             {
-                if (map[y,x] == 0)
+                if (map[y, x] == 0)
                 {
                     List<int> need = new();
                     SdokuRecord st = new SdokuRecord(y, x, need);
@@ -1496,7 +1492,7 @@ public class Tree
         bool isDone = false;
         SdokuRecursion(map, questList, 0, ref isDone);
 
-      
+
     }
 
     struct SdokuRecord
@@ -1516,7 +1512,7 @@ public class Tree
     static void SdokuRecursion(int[,] _map, List<SdokuRecord> _needList, int _curIdx, ref bool _isDone)
     {
         //해당번째 아이템을 넣어서 아이템이 진행되는지 - 마지막 경우까지 들어갔다면 완료 된거
-        if(_needList.Count == _curIdx && _isDone == false)
+        if (_needList.Count == _curIdx && _isDone == false)
         {
             _isDone = true; //접근한 최초 한번만 그림그리도록
             //모든 리스트의 값들을 다 넣을 수 있었다. 답이 채워졌다.
@@ -1544,7 +1540,7 @@ public class Tree
             int posY = curRecord.y;
             int posX = curRecord.x;
             //그 빈칸에 이제 인풋넘버를 넣을꺼야 넣었을때 다른거랑 만족하는지 보는거야 
-            if(CheckInput(_map, posY, posX, inputNum))
+            if (CheckInput(_map, posY, posX, inputNum))
             {
                 //넣을 수 있으면 넣고
                 _map[posY, posX] = inputNum;
@@ -1564,7 +1560,7 @@ public class Tree
         for (int i = 0; i < 9; i++)
         {
             int haveNum = _map[_y, i];
-            if(haveNum == _inputNum)
+            if (haveNum == _inputNum)
             {
                 return false;
             }
@@ -1666,6 +1662,255 @@ public class Tree
     }
 
     #endregion
+
+    #region 백팩 12865
+    static void BackPack()
+    {
+        string[] command = Console.ReadLine().Split();
+        int count = int.Parse(command[0]);
+        int k = int.Parse(command[1]);
+        int[][] info = new int[count][];
+        for (int i = 0; i < count; i++)
+        {
+            string[] infoStr = Console.ReadLine().Split();
+            int weight = int.Parse(infoStr[0]);
+            int value = int.Parse(infoStr[1]);
+            info[i] = new int[] { weight, value };
+        }
+        //정보 입력은 되엇고
+        //이제 k값 이내에 저걸해야하는데
+        // Array.Sort(info, (a, b) => b[1].CompareTo(a[1]));
+
+        int curValue = 0;
+        int maxValue = 0;
+        int[] sumInfo = new int[count]; //해당 품목부터 뒤의 품목의 모든 합 -> 만약 뒤에껄 다 넣는다 해도 못이기면 탐색안하게
+        sumInfo[count - 1] = info[count - 1][1]; //맨 끝에 넣어넣고
+        int[] weightInfo = new int[count];
+        weightInfo[count - 1] = info[count - 1][0];
+        for (int i = count - 2; i >= 0; i--)
+        {
+            sumInfo[i] = sumInfo[i + 1] + info[i][1];
+            weightInfo[i] = weightInfo[i + 1] + info[i][0];
+        }
+        //Put(info, sumInfo, weightInfo, k, 0, ref curValue, ref maxValue);
+        PutDp(info, k);
+    }
+
+    static void PutDp(int[][] _info, int _k)
+    {
+        //k만큼 넣을거야
+        int[] kRecord = new int[_k + 1];
+        for (int i = 0; i < _info.GetLength(0); i++)
+        {
+            int weight = _info[i][0];
+            int value = _info[i][1];
+            //이제 넣을거야
+            //공간 kRecord에 하나씩 넣은걸 기록해갈것
+            for (int idx = _k; idx >= weight; idx--)
+            {
+                //해당 무게에 weight만큼 넣을테니 이전기록 [_k-weight]의 최대무게에 내껄 더하면된다.
+                kRecord[idx] = Math.Max(kRecord[idx], kRecord[idx - weight] + value);
+                //그러면 처음에 넣은애의 무게는 무게만큼 공간이 채워지고. 
+                //그다음 넣을 애의 무게도 넣을 수있는 테이블에서 계속 더해지면서 진행
+            }
+        }
+
+        int maxValue = 0;
+        for (int i = 0; i < kRecord.Length; i++)
+        {
+            maxValue = Math.Max(maxValue, kRecord[i]);
+        }
+        Console.WriteLine(maxValue);
+    }
+
+    static void Put(int[][] _info, int[] _sumInfo, int[] _weightInfo, int _rest, int _curIdx, ref int _curValue, ref int _maxValue)
+    {
+        if (_info.GetLength(0) == _curIdx)
+        {
+            //인덱스 밖이면 넘기고
+            return;
+        }
+
+        int weight = _info[_curIdx][0];
+        int value = _info[_curIdx][1];
+
+        if (_maxValue >= _curValue + _sumInfo[_curIdx])
+        {
+            // 이후의모든걸 넣어도 최댓값을 못넘거나
+            return;
+        }
+        if (_rest >= _weightInfo[_curIdx])
+        {
+            //남은거 다 넣을만큼 공간이 있으면
+            _maxValue = Math.Max(_maxValue, (_curValue + _sumInfo[_curIdx]));  //현재부터 다더한값 넣고 계산뒤 패스
+
+            return;
+        }
+
+        //자기를 넣거나
+        if (_rest >= weight)
+        {
+            _curValue += value;
+            _rest -= weight;
+            Put(_info, _sumInfo, _weightInfo, _rest, _curIdx + 1, ref _curValue, ref _maxValue);
+            //다 넣고 나면
+            _maxValue = Math.Max(_curValue, _maxValue);
+            //자기 정보 복구
+            _curValue -= value;
+            _rest += weight;
+        }
+        //자기를 빼고 가거나
+        Put(_info, _sumInfo, _weightInfo, _rest, _curIdx + 1, ref _curValue, ref _maxValue);
+        _maxValue = Math.Max(_curValue, _maxValue);
+    }
+    #endregion
+
+    #region 전기선라인 2565
+    static void SparkLine()
+    {
+        int count = int.Parse(Console.ReadLine());
+        List<(int, int)> lineList = new();
+        for (int i = 0; i < count; i++)
+        {
+            string[] lineStr = Console.ReadLine().Split();
+            int left = int.Parse(lineStr[0]);
+            int right = int.Parse(lineStr[1]);
+            lineList.Add((left, right));
+        }
+
+        //왼쪽 오른쪽 정보가
+        //lineList에 들어가있고. 
+        //하나씩 하면서 엉키는거 빼면되려나? 
+        //다른선을 많이 가리는애를 빼면될것같은데
+        lineList.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+        //이제 정렬된 item2의 값이 오름차순으로 되게 뽑기만하면되거든. 
+        //길이가 1,2,3일때 최댓값을 갱신해준다? 그리고 현재 값을 갱신?
+        //갱신되면 최대 길이가 되고 
+        int maxCount = 1;
+        List<int> answerList = new();
+        answerList.Add(lineList[0].Item2); //초기값 넣고
+        for (int i = 1; i < lineList.Count; i++)
+        {
+            int lineValue = lineList[i].Item2; //연결될 녀석
+            bool isChange = false;
+            for (int x = 0; x < answerList.Count; x++)
+            {
+                if (answerList[x] < lineValue)
+                {
+                    //기존값보다 크면 
+                    continue;//넘어가고
+                }
+                else
+                {
+                    //기존값보다 작으면
+                    //해당 위치의 최솟값을 이놈으로 대체 
+                    answerList[x] = lineValue;
+                    isChange = true;
+                    break;
+                }
+            }
+            if (isChange == false)
+            {
+                //교체가 일어나지 않았단건 얘가 제일 큰수라는거
+                answerList.Add(lineValue); //줄 연결
+            }
+        }
+        Console.WriteLine(lineList.Count - answerList.Count);
+    }
+    #endregion
+    static void Main()
+    {
+        Bitonic();
+    }
+
+    #region 바이토닉 11054
+    static void Bitonic()
+    {
+        int count = int.Parse(Console.ReadLine());
+        string[] question = Console.ReadLine().Split();
+        List<int> questList = new();
+        for (int i = 0; i < question.Length; i++)
+        {
+            questList.Add(int.Parse(question[i]));
+        } //문제 완성
+
+        //쭈욱 올라가다가 쭈욱 내려가는 가장 큰 길이
+
+        int maxBio = 0;
+        for (int g = 0; g < questList.Count; g++)
+        {
+            int goalIdx = g;
+            int goalValue = questList[goalIdx];
+
+            List<int> upList = new();
+            List<int> downList = new();
+            for (int i = 0; i < goalIdx; i++)
+            {
+                int addValue = questList[i];
+                bool isChange = false;
+                if (goalValue <= addValue)
+                {
+                 
+                    continue;
+                }
+                for (int x = 0; x < upList.Count; x++)
+                {
+                  
+                    if (upList[x] < addValue)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        upList[x] = addValue;
+                        isChange = true;
+                        break;
+                    }
+                }
+                if (isChange == false)
+                {
+                    upList.Add(addValue);
+                }
+            }
+            int upCount = upList.Count;
+            for (int i = goalIdx + 1; i < question.Length; i++)
+            {
+                int addValue = questList[i];
+                bool isChange = false;
+                if (goalValue <= addValue)
+                {
+
+                    continue;
+                }
+                for (int x = 0; x < downList.Count; x++)
+                {
+                  
+                    if (downList[x] > addValue)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        downList[x] = addValue;
+                        isChange = true;
+                        break;
+                    }
+                }
+                if (isChange == false)
+                {
+                    downList.Add(addValue);
+                }
+            }
+            int downCount = downList.Count;
+
+            maxBio = Math.Max(maxBio, downCount + upCount + 1);
+        }
+
+        Console.WriteLine(maxBio);
+    }
+    #endregion
+
+
 }
 
 
