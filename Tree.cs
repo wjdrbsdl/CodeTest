@@ -1818,10 +1818,6 @@ public class Tree
         Console.WriteLine(lineList.Count - answerList.Count);
     }
     #endregion
-    static void Main()
-    {
-        Bitonic();
-    }
 
     #region 바이토닉 11054
     static void Bitonic()
@@ -1850,12 +1846,12 @@ public class Tree
                 bool isChange = false;
                 if (goalValue <= addValue)
                 {
-                 
+
                     continue;
                 }
                 for (int x = 0; x < upList.Count; x++)
                 {
-                  
+
                     if (upList[x] < addValue)
                     {
                         continue;
@@ -1884,7 +1880,7 @@ public class Tree
                 }
                 for (int x = 0; x < downList.Count; x++)
                 {
-                  
+
                     if (downList[x] > addValue)
                     {
                         continue;
@@ -1910,7 +1906,155 @@ public class Tree
     }
     #endregion
 
+    static void Main()
+    {
+       
+    }
 
+    #region 동전 보자기
+    static void NoDupliDraw()
+    {
+        string[] command = Console.ReadLine().Split();
+        int diceCount = int.Parse(command[0]);
+        int goal = int.Parse(command[1]);
+        int[] dice = new int[diceCount];
+        for (int i = 0; i < diceCount; i++)
+        {
+            dice[i] = int.Parse(Console.ReadLine());
+        }
+        //이걸 n개로 만들때의 거시기
+        //Array.Sort(dice);
+        //int count = goal / dice[0];
+        //int answerCount = 0;
+        //Draw(dice, 0, count, 0, goal, ref answerCount);
+        //Console.WriteLine(answerCount);
+        DrawDp(dice, goal);
+        
+    }
+
+    static void Draw(int[] _memeber, int _startIdx, int _curDeapth, int _sum, int _goal, ref int _answerCount)
+    {
+        if (_goal == _sum)
+        {
+            _answerCount += 1;
+            return;
+        }
+        if (_curDeapth == 0)
+        {
+            return;
+        }
+        if(_goal < _sum)
+        {
+            return;
+        }
+
+        for (int i = _startIdx; i < _memeber.Length; i++)
+        {
+            int drawMemeber = _memeber[i];
+            int sum = _sum + drawMemeber;
+            Draw(_memeber, i, _curDeapth -1, sum, _goal, ref _answerCount);
+        }
+    }
+
+    static void DrawDp(int[] coinValues, int _goal)
+    {
+        //goal이 될때까지 합을 더한다?
+        int[] muchValues = new int[_goal+1]; //골까지 합산
+        muchValues[0] = 1; //첫번째값은 1로 해놔야하나?
+        for (int i = 1; i <= _goal; i++)
+        {
+            int curGoal = i; //현재 만들려는 숫자
+            for (int x = 0; x < coinValues.Length; x++)
+            {
+                int curValue = coinValues[x]; //현재 더하려는 숫자
+                if(curGoal-curValue < 0)
+                {
+                    //인덱스 벗어나면 얘는 못넣는거
+                    continue;
+                }
+                //인덱스 안벗어나면
+                muchValues[i] += muchValues[curGoal - curValue]; //얘보다 부족한 값을 만드는 경우의수를 더하기
+                //위의 짓을 반복? //1을 만들때 만드는 가짓수는 1이 될꺼고
+                //2를 만들때는 2는 [0] + 2가 될거고1은 [1] +1 이니까 그값을 더하면될거고 이래저래?
+                //근데 128이떠 이건 같은 조합일때를 제외를 못한거거든..
+                //1 + 2 와 2 + 1은 같으니까.
+            }
+        }
+        Console.WriteLine(muchValues[_goal]); //목표값 만드는 경우의수 보면 되기?
+    }
+    #endregion
+
+    #region 낮게이동하기
+    static void MoveLower()
+    {
+        string[] command = Console.ReadLine().Split();
+        int row = int.Parse(command[0]);
+        int col = int.Parse(command[1]);
+        int[,] map = new int[row, col];
+        int[,] record = new int[row, col];
+        for (int i = 0; i < row; i++)
+        {
+            string[] lineStr = Console.ReadLine().Split();
+            for (int c = 0; c < col; c++)
+            {
+                map[i, c] = int.Parse(lineStr[c]);
+                record[i, c] = -1;
+            }
+        } //맵핑
+
+        //0,0 에서부터 해당 위치의 숫자보다 낮은 위치로 이동해서, row-1, c-1 위치에 도달하는 경우의 수 구하기
+
+        record[0, 0] = 0;
+        LowSearch(map, record, 0, 0, row, col);
+        Console.WriteLine(record[0,0]);
+
+    }
+   
+
+    static int LowSearch(int[,] _map, int[,] _record, int _curR, int _curC, int _maxR, int _maxC)
+    {
+        int curR = _curR;
+        int curC = _curC;
+        int curValue = _map[curR, curC];
+
+        int[] dc = { -1, 1, 0, 0 };
+        int[] dr = { 0, 0, -1, 1 };
+        for (int i = 0; i < 4; i++)
+        {
+            int nR = curR + dr[i];
+            int nC = curC + dc[i];
+
+            if (nR < 0 || _maxR <= nR || nC < 0 || _maxC <= nC)
+            {
+                //벗어나는 범위는 탐색 안함
+                continue;
+            }
+    
+            if (curValue <= _map[nR, nC])
+            {
+                //다음 위치가 현재 위치이상이면 진행안함
+                continue;
+            }
+
+            if (nR == _maxR-1 && nC == _maxC-1 )
+            {
+                _record[curR, curC] += 1;
+                continue;
+            }
+
+            if (_record[nR, nC] != -1)
+            {
+                //이미 지나간곳
+                _record[curR, curC] += _record[nR, nC];
+                continue;
+            }
+
+            _record[nR, nC] = 0; //이동하려는곳 기록값 0 으로 초기화하고 
+            _record[curR,curC] += LowSearch(_map, _record, nR, nC, _maxR, _maxC);
+        }
+        return _record[curR, curC];
+    }
+    #endregion
 }
 
 
