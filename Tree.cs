@@ -1906,83 +1906,6 @@ public class Tree
     }
     #endregion
 
-    static void Main()
-    {
-       
-    }
-
-    #region 동전 보자기
-    static void NoDupliDraw()
-    {
-        string[] command = Console.ReadLine().Split();
-        int diceCount = int.Parse(command[0]);
-        int goal = int.Parse(command[1]);
-        int[] dice = new int[diceCount];
-        for (int i = 0; i < diceCount; i++)
-        {
-            dice[i] = int.Parse(Console.ReadLine());
-        }
-        //이걸 n개로 만들때의 거시기
-        //Array.Sort(dice);
-        //int count = goal / dice[0];
-        //int answerCount = 0;
-        //Draw(dice, 0, count, 0, goal, ref answerCount);
-        //Console.WriteLine(answerCount);
-        DrawDp(dice, goal);
-        
-    }
-
-    static void Draw(int[] _memeber, int _startIdx, int _curDeapth, int _sum, int _goal, ref int _answerCount)
-    {
-        if (_goal == _sum)
-        {
-            _answerCount += 1;
-            return;
-        }
-        if (_curDeapth == 0)
-        {
-            return;
-        }
-        if(_goal < _sum)
-        {
-            return;
-        }
-
-        for (int i = _startIdx; i < _memeber.Length; i++)
-        {
-            int drawMemeber = _memeber[i];
-            int sum = _sum + drawMemeber;
-            Draw(_memeber, i, _curDeapth -1, sum, _goal, ref _answerCount);
-        }
-    }
-
-    static void DrawDp(int[] coinValues, int _goal)
-    {
-        //goal이 될때까지 합을 더한다?
-        int[] muchValues = new int[_goal+1]; //골까지 합산
-        muchValues[0] = 1; //첫번째값은 1로 해놔야하나?
-        for (int i = 1; i <= _goal; i++)
-        {
-            int curGoal = i; //현재 만들려는 숫자
-            for (int x = 0; x < coinValues.Length; x++)
-            {
-                int curValue = coinValues[x]; //현재 더하려는 숫자
-                if(curGoal-curValue < 0)
-                {
-                    //인덱스 벗어나면 얘는 못넣는거
-                    continue;
-                }
-                //인덱스 안벗어나면
-                muchValues[i] += muchValues[curGoal - curValue]; //얘보다 부족한 값을 만드는 경우의수를 더하기
-                //위의 짓을 반복? //1을 만들때 만드는 가짓수는 1이 될꺼고
-                //2를 만들때는 2는 [0] + 2가 될거고1은 [1] +1 이니까 그값을 더하면될거고 이래저래?
-                //근데 128이떠 이건 같은 조합일때를 제외를 못한거거든..
-                //1 + 2 와 2 + 1은 같으니까.
-            }
-        }
-        Console.WriteLine(muchValues[_goal]); //목표값 만드는 경우의수 보면 되기?
-    }
-    #endregion
 
     #region 낮게이동하기
     static void MoveLower()
@@ -2006,10 +1929,10 @@ public class Tree
 
         record[0, 0] = 0;
         LowSearch(map, record, 0, 0, row, col);
-        Console.WriteLine(record[0,0]);
+        Console.WriteLine(record[0, 0]);
 
     }
-   
+
 
     static int LowSearch(int[,] _map, int[,] _record, int _curR, int _curC, int _maxR, int _maxC)
     {
@@ -2029,14 +1952,14 @@ public class Tree
                 //벗어나는 범위는 탐색 안함
                 continue;
             }
-    
+
             if (curValue <= _map[nR, nC])
             {
                 //다음 위치가 현재 위치이상이면 진행안함
                 continue;
             }
 
-            if (nR == _maxR-1 && nC == _maxC-1 )
+            if (nR == _maxR - 1 && nC == _maxC - 1)
             {
                 _record[curR, curC] += 1;
                 continue;
@@ -2050,11 +1973,178 @@ public class Tree
             }
 
             _record[nR, nC] = 0; //이동하려는곳 기록값 0 으로 초기화하고 
-            _record[curR,curC] += LowSearch(_map, _record, nR, nC, _maxR, _maxC);
+            _record[curR, curC] += LowSearch(_map, _record, nR, nC, _maxR, _maxC);
         }
         return _record[curR, curC];
     }
     #endregion
+
+    #region 동전 보자기
+    static void NoDupliDraw()
+    {
+        string[] command = Console.ReadLine().Split();
+        int diceCount = int.Parse(command[0]);
+        int goal = int.Parse(command[1]);
+        int[] dice = new int[diceCount];
+        for (int i = 0; i < diceCount; i++)
+        {
+            dice[i] = int.Parse(Console.ReadLine());
+        }
+        //이걸 n개로 만들때의 거시기
+        //Array.Sort(dice);
+        //int count = goal / dice[0];
+        //int answerCount = 0;
+        //Draw(dice, 0, count, 0, goal, ref answerCount);
+        //Console.WriteLine(answerCount);
+        DrawDp(dice, goal);
+
+    }
+
+    static void Draw(int[] _memeber, int _startIdx, int _curDeapth, int _sum, int _goal, ref int _answerCount)
+    {
+        if (_goal == _sum)
+        {
+            _answerCount += 1;
+            return;
+        }
+        if (_curDeapth == 0)
+        {
+            return;
+        }
+        if (_goal < _sum)
+        {
+            return;
+        }
+
+        for (int i = _startIdx; i < _memeber.Length; i++)
+        {
+            int drawMemeber = _memeber[i];
+            int sum = _sum + drawMemeber;
+            Draw(_memeber, i, _curDeapth - 1, sum, _goal, ref _answerCount);
+        }
+    }
+
+    static void DrawDp(int[] coinValues, int _goal)
+    {
+        //goal이 될때까지 합을 더한다?
+        int[] muchValues = new int[_goal + 1]; //골까지 합산
+        muchValues[0] = 1; //첫번째값은 1로 해놔야하나?
+        for (int i = 1; i <= _goal; i++)
+        {
+            int curGoal = i; //현재 만들려는 숫자
+            for (int x = 0; x < coinValues.Length; x++)
+            {
+                int curValue = coinValues[x]; //현재 더하려는 숫자
+                if (curGoal - curValue < 0)
+                {
+                    //인덱스 벗어나면 얘는 못넣는거
+                    continue;
+                }
+                //인덱스 안벗어나면
+                muchValues[i] += muchValues[curGoal - curValue]; //얘보다 부족한 값을 만드는 경우의수를 더하기
+                //위의 짓을 반복? //1을 만들때 만드는 가짓수는 1이 될꺼고
+                //2를 만들때는 2는 [0] + 2가 될거고1은 [1] +1 이니까 그값을 더하면될거고 이래저래?
+                //근데 128이떠 이건 같은 조합일때를 제외를 못한거거든..
+                //1 + 2 와 2 + 1은 같으니까.
+            }
+        }
+        Console.WriteLine(muchValues[_goal]); //목표값 만드는 경우의수 보면 되기?
+    }
+    #endregion
+
+    static void Main()
+    {
+        IsBiGraph();
+    }
+
+
+    static void IsBiGraph()
+    {
+        int testCase = int.Parse(Console.ReadLine());
+        for (int i = 0; i < testCase; i++)
+        {
+            string[] command = Console.ReadLine().Split();
+            int nodeCount = int.Parse(command[0]);
+            int lineCount = int.Parse(command[1]);
+            List<int>[] graph = new List<int>[nodeCount + 1];
+
+            for (int c = 0; c < graph.Length; c++)
+            {
+                graph[c] = new List<int>();
+            }
+
+            for (int lineIdx = 0; lineIdx < lineCount; lineIdx++)
+            {
+                string[] lineStr = Console.ReadLine().Split();
+                int start = int.Parse(lineStr[0]);
+                int end = int.Parse(lineStr[1]);
+
+                graph[start].Add(end);
+                graph[end].Add(start); //무방향 그래프
+            }
+
+            bool isBi = SearchBi(graph);
+
+            Console.WriteLine(isBi ? "YES" : "NO");
+        }
+    }
+    static bool SearchBi(List<int>[] _graph)
+    {
+        int[] visited = new int[_graph.Length];
+
+        Queue<int> nextQ = new();
+        nextQ.Enqueue(1);
+        while (nextQ.Count >0)
+        {
+            int curNode = nextQ.Dequeue();
+
+            if (visited[curNode] == 0)
+            {
+                visited[curNode] = 2; //1로 시작
+            }
+
+            List<int> nextList = _graph[curNode]; //내가갈곳들
+            for (int i = 0; i < nextList.Count; i++)
+            {
+                int nextNode = nextList[i];
+                if (visited[curNode] == visited[nextNode])
+                {
+                    //가려는 곳이 현재의 값 이상이면 (다른 데서 가기로 찜한곳이므로 순환이됨)
+                    //홀수 순환이라면 
+                    return false;
+                }
+                else if (visited[curNode] < visited[nextNode])
+                {
+                    //짝수 순환이라면 일단 넘김
+                    continue;
+                }
+                if (visited[nextNode]== visited[curNode] - 1)
+                {
+                    //내가 왔던 곳이면
+                    continue; //패쓰
+                }
+                visited[nextNode] = visited[curNode] + 1;
+                nextQ.Enqueue(nextNode);
+            }
+
+            if(nextQ.Count == 0)
+            {
+                //만약 진행중이던 노드의 여정이 끝났으면
+                for (int i = 1; i < visited.Length; i++)
+                {
+                    //방문안한곳을 찾아서 넣기
+                    if (visited[i] == 0)
+                    {
+                        nextQ.Enqueue(i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
 }
 
 
