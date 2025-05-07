@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-internal class Program
+public class Pre
 {
 
     #region 하노이
