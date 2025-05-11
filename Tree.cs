@@ -2054,40 +2054,9 @@ public class Tree
 
     static void Main()
     {
-        IsBiGraph();
+    
     }
 
-
-    static void IsBiGraph()
-    {
-        int testCase = int.Parse(Console.ReadLine());
-        for (int i = 0; i < testCase; i++)
-        {
-            string[] command = Console.ReadLine().Split();
-            int nodeCount = int.Parse(command[0]);
-            int lineCount = int.Parse(command[1]);
-            List<int>[] graph = new List<int>[nodeCount + 1];
-
-            for (int c = 0; c < graph.Length; c++)
-            {
-                graph[c] = new List<int>();
-            }
-
-            for (int lineIdx = 0; lineIdx < lineCount; lineIdx++)
-            {
-                string[] lineStr = Console.ReadLine().Split();
-                int start = int.Parse(lineStr[0]);
-                int end = int.Parse(lineStr[1]);
-
-                graph[start].Add(end);
-                graph[end].Add(start); //무방향 그래프
-            }
-
-            bool isBi = SearchBi(graph);
-
-            Console.WriteLine(isBi ? "YES" : "NO");
-        }
-    }
     static bool SearchBi(List<int>[] _graph)
     {
         int[] visited = new int[_graph.Length];
@@ -2144,6 +2113,8 @@ public class Tree
 
         return true;
     }
+
+
 
 }
 

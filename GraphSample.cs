@@ -1219,10 +1219,7 @@ public class GraphSample
     }
     #endregion
 
-    static void FF()
-    {
-
-    }
+   
 }
 
 #region 덱
