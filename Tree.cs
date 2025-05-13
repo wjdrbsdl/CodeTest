@@ -2054,7 +2054,7 @@ public class Tree
 
     static void Main()
     {
-    
+        AAA();
     }
 
     static bool SearchBi(List<int>[] _graph)
@@ -2114,6 +2114,27 @@ public class Tree
         return true;
     }
 
+    static void AAA()
+    {
+        int[] bin = new int[100000];
+        int[] bww = new int[100000];
+        int[] bw = new int[100000];
+
+        bin[0] = 1;
+
+        for (int i = 1; i < 3; i++)
+        {
+            bin[i] = bin[i - 1] + 2 + bw[i - 1]*2;
+            bw[i] = bin[i - 1] + bw[i - 1];
+        }
+        for(int i = 3; i< 12; i++)
+        {
+            bww[i] = bin[i - 3] * 2;
+            bin[i] = bin[i - 1] + 2 + bw[i - 1] * 2 + bww[i];
+            bw[i] = bin[i - 1] + bw[i - 1];
+            Console.WriteLine(i+"번째 " + (bin[i] + bw[i]*2));
+        }
+    }
 
 
 }
