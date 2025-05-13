@@ -2059,7 +2059,7 @@ public class Tree
 
     static bool SearchBi(List<int>[] _graph)
     {
-        int[] visited = new int[_graph.Length];
+        int[] viited = new int[_graph.Length];
 
         Queue<int> nextQ = new();
         nextQ.Enqueue(1);
@@ -2067,42 +2067,42 @@ public class Tree
         {
             int curNode = nextQ.Dequeue();
 
-            if (visited[curNode] == 0)
+            if (viited[curNode] == 0)
             {
-                visited[curNode] = 2; //1로 시작
+                viited[curNode] = 2; //1로 시작
             }
 
             List<int> nextList = _graph[curNode]; //내가갈곳들
             for (int i = 0; i < nextList.Count; i++)
             {
                 int nextNode = nextList[i];
-                if (visited[curNode] == visited[nextNode])
+                if (viited[curNode] == viited[nextNode])
                 {
                     //가려는 곳이 현재의 값 이상이면 (다른 데서 가기로 찜한곳이므로 순환이됨)
                     //홀수 순환이라면 
                     return false;
                 }
-                else if (visited[curNode] < visited[nextNode])
+                else if (viited[curNode] < viited[nextNode])
                 {
                     //짝수 순환이라면 일단 넘김
                     continue;
                 }
-                if (visited[nextNode]== visited[curNode] - 1)
+                if (viited[nextNode]== viited[curNode] - 1)
                 {
                     //내가 왔던 곳이면
                     continue; //패쓰
                 }
-                visited[nextNode] = visited[curNode] + 1;
+                viited[nextNode] = viited[curNode] + 1;
                 nextQ.Enqueue(nextNode);
             }
 
             if(nextQ.Count == 0)
             {
                 //만약 진행중이던 노드의 여정이 끝났으면
-                for (int i = 1; i < visited.Length; i++)
+                for (int i = 1; i < viited.Length; i++)
                 {
                     //방문안한곳을 찾아서 넣기
-                    if (visited[i] == 0)
+                    if (viited[i] == 0)
                     {
                         nextQ.Enqueue(i);
                         break;
